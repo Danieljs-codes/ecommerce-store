@@ -51,6 +51,7 @@ export const {
 
     // Delete the user when they are deleted from Better Auth
     onDeleteUser: async (ctx, userId) => {
+      // TODO: We probably wanna delete the users data too or at least soft delete them.
       await ctx.db.delete(userId as Id<"users">);
     },
   });

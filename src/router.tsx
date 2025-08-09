@@ -5,6 +5,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { ConvexProvider, ConvexReactClient } from 'convex/react'
 import { ConvexQueryClient } from '@convex-dev/react-query'
+import Nprogress from 'nprogress'
 import { routeTree } from './routeTree.gen'
 import { env } from './env'
 
@@ -43,6 +44,17 @@ export const createRouter = () => {
         {children}
       </ConvexProvider>
     ),
+  })
+
+  Nprogress.configure({
+    showSpinner: false,
+  })
+  router.subscribe('onBeforeLoad', ({ fromLocation, pathChanged }) => {
+    // Don't show the progress bar on initial page load, seems like the onLoad event doesn't fire in that case
+    fromLocation && pathChanged && Nprogress.start()
+  })
+  router.subscribe('onLoad', () => {
+    Nprogress.done()
   })
 
   setupRouterSsrQueryIntegration({

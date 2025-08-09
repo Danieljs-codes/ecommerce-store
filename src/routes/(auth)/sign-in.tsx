@@ -12,6 +12,7 @@ import { authClient } from '@/lib/auth-client'
 import { Loader } from '@/components/ui/loader'
 import { Note } from '@/components/ui/note'
 import { cn } from '@/lib/utils'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export const Route = createFileRoute('/(auth)/sign-in')({
   component: RouteComponent,
@@ -29,6 +30,7 @@ function RouteComponent() {
     defaultValues: {
       email: '',
       password: '',
+      rememberMe: false,
     },
   })
 
@@ -98,6 +100,27 @@ function RouteComponent() {
             />
           )}
         />
+        <div className="flex items-center justify-between">
+          <Controller
+            control={control}
+            name="rememberMe"
+            render={({ field: { value, ...field }, fieldState }) => (
+              <Checkbox
+                isSelected={value}
+                isInvalid={fieldState.invalid}
+                {...field}
+              >
+                Remember Me
+              </Checkbox>
+            )}
+          />
+          <Link
+            to="/forgot-password"
+            className="text-sm/6 font-medium text-primary-subtle-fg hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
         <Button type="submit" isPending={isSubmitting}>
           {isSubmitting && <Loader />}
           Sign in

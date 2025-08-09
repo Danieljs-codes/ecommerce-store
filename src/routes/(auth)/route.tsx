@@ -1,12 +1,8 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
-import { toast } from 'sonner'
 import { setFlashCookie } from '@/lib/utils'
 
 export const Route = createFileRoute('/(auth)')({
   beforeLoad: ({ context }) => {
-    console.log('Got here')
-    console.log(toast)
-
     if (context.token && context.userId) {
       setFlashCookie({
         intent: 'info',

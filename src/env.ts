@@ -13,6 +13,7 @@ export const env = createEnv({
     VITE_APP_TITLE: z.string().min(1).optional(),
     VITE_CONVEX_URL: z.url(),
     VITE_CONVEX_SITE_URL: z.url(),
+    VITE_APP_URL: z.url(),
   },
 
   // Use process.env for server vars, import.meta.env for client vars
@@ -25,6 +26,7 @@ export const env = createEnv({
     VITE_APP_TITLE: import.meta.env.VITE_APP_TITLE,
     VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL,
     VITE_CONVEX_SITE_URL: import.meta.env.VITE_CONVEX_SITE_URL,
+    VITE_APP_URL: import.meta.env.VITE_APP_URL,
   },
 
   emptyStringAsUndefined: true,
