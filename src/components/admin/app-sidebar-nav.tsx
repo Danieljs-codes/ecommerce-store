@@ -6,22 +6,22 @@ import {
   IconLogout,
   IconSettings,
 } from '@intentui/icons'
+import { IconMinusVertical } from '@tabler/icons-react'
 import { Avatar } from '@/components/ui/avatar'
-import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { Menu } from '@/components/ui/menu'
 import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
 
-export default function AppSidebarNav() {
+export default function AppSidebarNav({ title }: { title: string }) {
   return (
     <SidebarNav>
-      <span className="flex items-center gap-x-4">
+      <span className="flex items-center gap-x-0">
         <SidebarTrigger className="-ml-2" />
-        <Breadcrumbs className="hidden md:flex">
-          <Breadcrumbs.Item href="/blocks/sidebar/sidebar-01">
-            Dashboard
-          </Breadcrumbs.Item>
-          <Breadcrumbs.Item>Newsletter</Breadcrumbs.Item>
-        </Breadcrumbs>
+        <div className="flex items-center gap-x-2">
+          <IconMinusVertical data-slot="icon" className="text-fg/70" />
+          <span className="text-base font-semibold capitalize">
+            {title.toLowerCase()}
+          </span>
+        </div>
       </span>
       <UserMenu />
     </SidebarNav>

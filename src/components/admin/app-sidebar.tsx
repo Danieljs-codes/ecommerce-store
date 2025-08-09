@@ -8,14 +8,18 @@ import {
   IconLogout,
   IconMessageFill,
   IconNotesFill,
-  IconPackageFill,
   IconSettingsFill,
   IconShieldFill,
   IconTicketFill,
   IconTruckFill,
 } from '@intentui/icons'
-import { IconCategoryFilled, IconDiscountFilled } from '@tabler/icons-react'
+import {
+  IconCategoryFilled,
+  IconDiscountFilled,
+  IconSettingsFilled,
+} from '@tabler/icons-react'
 import { useLocation } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { Logo } from '../logo'
 import { Avatar } from '@/components/ui/avatar'
 import { Link } from '@/components/ui/link'
@@ -35,6 +39,7 @@ import {
   SidebarRail,
   SidebarSection,
   SidebarSectionGroup,
+  useSidebar,
 } from '@/components/ui/sidebar'
 
 export default function AppSidebar(
@@ -43,6 +48,12 @@ export default function AppSidebar(
   const pathname = useLocation({
     select: (s) => s.pathname,
   })
+  const { setIsOpenOnMobile } = useSidebar()
+
+  // Listen to when pathname changes and close the sidebar
+  useEffect(() => {
+    setIsOpenOnMobile(false)
+  }, [pathname])
 
   return (
     <Sidebar {...props}>
@@ -101,6 +112,14 @@ export default function AppSidebar(
               <IconDiscountFilled data-slot="icon" />
               <SidebarLabel>Discounts</SidebarLabel>
             </SidebarLink>
+            <SidebarLink
+              isCurrent={pathname.toLowerCase() === '/admin/settings'}
+              to="/admin/settings"
+              tooltip="Settings"
+            >
+              <IconSettingsFilled data-slot="icon" />
+              <SidebarLabel>Settings</SidebarLabel>
+            </SidebarLink>
           </SidebarSection>
 
           <SidebarDisclosureGroup defaultExpandedKeys={[1]}>
@@ -125,24 +144,6 @@ export default function AppSidebar(
                 <SidebarItem href="#" tooltip="Documentation">
                   <IconNotesFill />
                   <SidebarLabel>Documentation</SidebarLabel>
-                </SidebarItem>
-              </SidebarDisclosurePanel>
-            </SidebarDisclosure>
-            <SidebarDisclosure id={2}>
-              <SidebarDisclosureTrigger>
-                <IconPackageFill />
-                <SidebarLabel>Inventory</SidebarLabel>
-              </SidebarDisclosureTrigger>
-              <SidebarDisclosurePanel>
-                <SidebarItem href="#" tooltip="Warehouse">
-                  <IconBuildingFill />
-                  <SidebarLabel>Warehouse</SidebarLabel>
-                </SidebarItem>
-                <SidebarItem href="#" tooltip="Stock Levels">
-                  <SidebarLabel>Stock Levels</SidebarLabel>
-                </SidebarItem>
-                <SidebarItem href="#" tooltip="Shipping">
-                  <SidebarLabel>Shipping</SidebarLabel>
                 </SidebarItem>
               </SidebarDisclosurePanel>
             </SidebarDisclosure>

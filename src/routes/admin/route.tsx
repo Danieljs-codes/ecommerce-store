@@ -1,11 +1,15 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '@convex/_generated/api'
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import {
+  Outlet,
+  createFileRoute,
+  redirect,
+  useChildMatches,
+} from '@tanstack/react-router'
 import { setFlashCookie } from '@/lib/utils'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/admin/app-sidebar'
 import AppSidebarNav from '@/components/admin/app-sidebar-nav'
-import { Heading } from '@/components/ui/heading'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async ({ context }) => {
@@ -29,14 +33,22 @@ export const Route = createFileRoute('/admin')({
 })
 
 function RouteComponent() {
+  const match = useChildMatches()
+
+  const loaderData = match[match.length - 1]?.loaderData
+
+  const title =
+    loaderData && 'title' in loaderData && typeof loaderData.title === 'string'
+      ? loaderData.title
+      : 'Dashboard'
+
   return (
     <SidebarProvider>
       <AppSidebar collapsible="dock" />
       <SidebarInset>
-        <AppSidebarNav />
+        <AppSidebarNav title={title} />
         <div className="p-4 lg:p-6">
-          <Heading>Basic</Heading>
-          <div className="h-[1000px] bg-muted" />
+          <Outlet />
         </div>
       </SidebarInset>
     </SidebarProvider>

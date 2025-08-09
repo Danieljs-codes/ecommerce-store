@@ -1,8 +1,4 @@
-import {
-  IconChevronLgDown,
-  IconHamburger,
-  IconSidebarFill,
-} from '@intentui/icons'
+import { IconChevronLgDown } from '@intentui/icons'
 import {
   createContext,
   use,
@@ -25,6 +21,10 @@ import {
 } from 'react-aria-components'
 import { twJoin, twMerge } from 'tailwind-merge'
 import { createLink } from '@tanstack/react-router'
+import {
+  IconLayoutSidebarFilled,
+  IconLayoutSidebarLeftExpandFilled,
+} from '@tabler/icons-react'
 import { Button } from './button'
 import { Tooltip } from './tooltip'
 import type {
@@ -669,8 +669,14 @@ const SidebarTrigger = ({
     >
       {children || (
         <>
-          <IconSidebarFill className="hidden md:inline" />
-          <IconHamburger className="inline md:hidden" />
+          <IconLayoutSidebarFilled
+            data-slot="icon"
+            className="hidden md:inline"
+          />
+          <IconLayoutSidebarLeftExpandFilled
+            data-slot="icon"
+            className="inline md:hidden"
+          />
           <span className="sr-only">Toggle Sidebar</span>
         </>
       )}
