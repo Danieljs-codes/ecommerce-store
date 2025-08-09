@@ -1,14 +1,25 @@
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext, useRouteContext } from '@tanstack/react-router'
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+  useRouteContext,
+} from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { createServerFn } from '@tanstack/react-start'
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react'
 import { getCookie, getWebRequest } from '@tanstack/react-start/server'
+import { ThemeProvider } from 'next-themes'
+import { useEffect } from 'react'
+import { toast } from 'sonner'
 import appCss from '../styles.css?url'
-import type { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
+import type { ConvexReactClient } from 'convex/react'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
 import { fetchSession, getCookieName } from '@/lib/server-auth-utils'
 import { authClient } from '@/lib/auth-client'
+import { Toast } from '@/components/ui/toast'
+import { getFlashCookie } from '@/lib/utils'
 
 // Server side session request
 const fetchAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -59,9 +70,11 @@ export const Route = createRootRouteWithContext<{
       ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
     }
 
-    return { userId, token }
+    const cookie = getFlashCookie()
+
+    return { userId, token, cookie }
   },
-  component: RootComponent
+  component: RootComponent,
 })
 
 function RootComponent() {
@@ -79,15 +92,35 @@ function RootComponent() {
 }
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="font-sans antialiased" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ThemeProvider disableTransitionOnChange attribute="class">
+          <InnerComponent>{children}</InnerComponent>
+          <Toast />
+        </ThemeProvider>
         <TanStackRouterDevtools />
         <Scripts />
       </body>
     </html>
   )
+}
+
+function InnerComponent({ children }: { children: React.ReactNode }) {
+  const { cookie } = Route.useRouteContext()
+
+  useEffect(() => {
+    if (!cookie) return
+    setTimeout(
+      () =>
+        toast[cookie.intent](cookie.message, {
+          description: cookie.description,
+        }),
+      0,
+    )
+  }, [cookie])
+
+  return <>{children}</>
 }

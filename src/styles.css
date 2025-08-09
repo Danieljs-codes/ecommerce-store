@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./toast.css";
 @plugin "tailwindcss-react-aria-components";
 
 @custom-variant dark (&:is(.dark *));
@@ -31,6 +32,8 @@
   --color-fg: var(--fg);
   --color-primary: var(--primary);
   --color-primary-fg: var(--primary-fg);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-fg: var(--primary-subtle-fg);
   --color-secondary: var(--secondary);
   --color-secondary-fg: var(--secondary-fg);
   --color-accent: var(--accent);
@@ -64,6 +67,7 @@
   --radius-lg: var(--radius-lg);
 }
 :root {
+    --pattern-fg: var(--color-border);
     --bg: var(--color-white);
     --fg: var(--color-zinc-950);
     --primary: var(--color-teal-600);
@@ -186,4 +190,15 @@
     background: var(--border);
     border-radius: 4px;
   }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+	transition: background-color 60000000s 0s, color 60000000s 0s;
+}
+
+input[data-autocompleted] {
+	background-color: transparent;
 }

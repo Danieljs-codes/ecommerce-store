@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import logo from '../logo.svg'
 
 export const Route = createFileRoute('/')({
@@ -15,7 +15,7 @@ function App() {
           alt="logo"
         />
         <p>
-          Edit <code>src/routes/index.tsx</code> and save to reload.
+          Edit <code>src/routes/index.tsx</code> and save to reload...
         </p>
         <a
           className="text-[#61dafb] hover:underline"
@@ -31,9 +31,11 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn TanStack
+          Learn TanStacksss
         </a>
       </header>
+      <Link to="/about">About</Link>
+      <Link to="/sign-in">Sign in</Link>
     </div>
   )
 }

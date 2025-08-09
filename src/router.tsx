@@ -1,10 +1,10 @@
 import { createRouter as createTanstackRouter } from '@tanstack/react-router'
-import { routerWithQueryClient } from '@tanstack/react-router-with-query'
-import { ConvexQueryClient } from "@convex-dev/react-query"
 
 // Import the generated route tree
 import { QueryClient } from '@tanstack/react-query'
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { ConvexProvider, ConvexReactClient } from 'convex/react'
+import { ConvexQueryClient } from '@convex-dev/react-query'
 import { routeTree } from './routeTree.gen'
 import { env } from './env'
 
@@ -15,37 +15,42 @@ export const createRouter = () => {
   const convex = new ConvexReactClient(CONVEX_URL, {
     unsavedChangesWarning: false,
   })
-  const convexQueryClient = new ConvexQueryClient(convex);
+  const convexQueryClient = new ConvexQueryClient(convex)
 
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         queryKeyHashFn: convexQueryClient.hashFn(),
         queryFn: convexQueryClient.queryFn(),
-      }
-    }
+      },
+    },
   })
 
-  convexQueryClient.connect(queryClient)
+  // convexQueryClient.connect(queryClient)
 
-  return routerWithQueryClient(
-    createTanstackRouter({
-      routeTree,
-      scrollRestoration: true,
-      defaultPreload: "intent",
-      defaultPreloadStaleTime: 0,
-      context: {
-        queryClient,
-        convexClient: convex,
-        convexQueryClient
-      },
-      Wrap: ({ children }) => (
-        <ConvexProvider client={convexQueryClient.convexClient}>
-          {children}
-        </ConvexProvider>
-      ),
-    }), queryClient
-  )
+  const router = createTanstackRouter({
+    routeTree,
+    scrollRestoration: true,
+    defaultPreload: 'intent',
+    defaultPreloadStaleTime: 0,
+    context: {
+      queryClient,
+      convexClient: convex,
+      convexQueryClient,
+    },
+    Wrap: ({ children }) => (
+      <ConvexProvider client={convexQueryClient.convexClient}>
+        {children}
+      </ConvexProvider>
+    ),
+  })
+
+  setupRouterSsrQueryIntegration({
+    router,
+    queryClient,
+  })
+
+  return router
 }
 
 // Register the router instance for type safety
