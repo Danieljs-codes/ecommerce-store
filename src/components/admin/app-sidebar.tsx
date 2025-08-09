@@ -1,5 +1,4 @@
 import {
-  IconBrandIntentui,
   IconBuildingFill,
   IconChevronsY,
   IconCircleQuestionmarkFill,
@@ -15,7 +14,9 @@ import {
   IconTicketFill,
   IconTruckFill,
 } from '@intentui/icons'
-import { IconCategory } from '@tabler/icons-react'
+import { IconCategoryFilled, IconDiscountFilled } from '@tabler/icons-react'
+import { useLocation } from '@tanstack/react-router'
+import { Logo } from '../logo'
 import { Avatar } from '@/components/ui/avatar'
 import { Link } from '@/components/ui/link'
 import { Menu } from '@/components/ui/menu'
@@ -39,39 +40,67 @@ import {
 export default function AppSidebar(
   props: React.ComponentProps<typeof Sidebar>,
 ) {
+  const pathname = useLocation({
+    select: (s) => s.pathname,
+  })
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <Link
           className="flex items-center gap-x-2 group-data-[collapsible=dock]:size-10 group-data-[collapsible=dock]:justify-center"
-          to="/dashboard"
+          to="/admin/dashboard"
         >
-          <IconBrandIntentui className="size-7" />
-          <SidebarLabel className="font-medium">
-            Intent <span className="text-muted-fg">UI</span>
+          <Logo className="size-6" />
+          <SidebarLabel className="font-bold">
+            Shop <span className="text-muted-fg font-normal">Sphere</span>
           </SidebarLabel>
         </Link>
       </SidebarHeader>
       <SidebarContent className="mask-b-from-95% mask-t-from-95%">
         <SidebarSectionGroup>
           <SidebarSection>
-            <SidebarLink to="" tooltip="Overview" isCurrent>
+            <SidebarLink
+              isCurrent={pathname.toLowerCase() === '/admin/dashboard'}
+              to="/admin/dashboard"
+              tooltip="Overview"
+            >
               <IconDashboardFill />
               <SidebarLabel>Overview</SidebarLabel>
             </SidebarLink>
 
-            <SidebarLink tooltip="Products">
+            <SidebarLink
+              isCurrent={pathname.toLowerCase() === '/admin/products'}
+              to="/admin/products"
+              tooltip="Products"
+            >
               <IconBuildingFill />
               <SidebarLabel>Products</SidebarLabel>
             </SidebarLink>
-            <SidebarLink tooltip="Orders">
+            <SidebarLink
+              isCurrent={pathname.toLowerCase() === '/admin/orders'}
+              to="/admin/orders"
+              tooltip="Orders"
+            >
               <IconTruckFill />
               <SidebarLabel>Orders</SidebarLabel>
             </SidebarLink>
-            <SidebarItem href="#" badge="4 Pending" tooltip="Payments">
-              <IconCategory data-slot="icon" />
-              <SidebarLabel>Payments</SidebarLabel>
-            </SidebarItem>
+            <SidebarLink
+              isCurrent={pathname.toLowerCase() === '/admin/categories'}
+              to="/admin/categories"
+              tooltip="Categories"
+            >
+              <IconCategoryFilled data-slot="icon" />
+              <SidebarLabel>Categories</SidebarLabel>
+            </SidebarLink>
+            <SidebarLink
+              isCurrent={pathname.toLowerCase() === '/admin/discounts'}
+              to="/admin/discounts"
+              tooltip="Discounts"
+            >
+              <IconDiscountFilled data-slot="icon" />
+              <SidebarLabel>Discounts</SidebarLabel>
+            </SidebarLink>
           </SidebarSection>
 
           <SidebarDisclosureGroup defaultExpandedKeys={[1]}>
