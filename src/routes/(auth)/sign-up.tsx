@@ -48,7 +48,9 @@ function RouteComponent() {
 
   return (
     <div className="w-full">
-      <Logo className="size-7" />
+      <Link to="/">
+        <Logo className="size-7" />
+      </Link>
       <h1 className="mt-2 font-semibold  text-xl/10">Sign up</h1>
       <p className="text-muted-fg text-sm/6">
         Create an account to get exclusive offers, save your favorites, and

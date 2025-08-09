@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { cn } from '@/lib/utils'
 import { authClient } from '@/lib/auth-client'
+import { Link } from '@/components/ui/link'
 
 export const Route = createFileRoute('/(auth)/reset-password')({
   component: RouteComponent,
@@ -63,7 +64,9 @@ function RouteComponent() {
 
   return (
     <div className="w-full">
-      <Logo className="size-7" />
+      <Link to="/">
+        <Logo className="size-7" />
+      </Link>
       <h1 className="mt-2 font-semibold text-xl/10">Reset Password</h1>
       <p className="text-muted-fg text-sm/6">
         Enter your email address and we'll send you a link to reset your

@@ -5,6 +5,12 @@ import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 
 const config = defineConfig({
+  resolve: {
+    alias: {
+      // /esm/icons/index.mjs only exports the icons statically, so no separate chunks are created
+      '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
+    },
+  },
   plugins: [
     // this is the plugin that enables path aliases
     viteTsConfigPaths({

@@ -2,6 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
+import { convexQuery } from '@convex-dev/react-query'
+import { api } from '@convex/_generated/api'
 import type { SignInSchema } from '@/lib/schema'
 import { TextField } from '@/components/ui/text-field'
 import { Logo } from '@/components/logo'
@@ -19,6 +22,7 @@ export const Route = createFileRoute('/(auth)/sign-in')({
 })
 
 function RouteComponent() {
+  const queryClient = useQueryClient()
   const navigate = Route.useNavigate()
   const {
     handleSubmit,
@@ -44,6 +48,10 @@ function RouteComponent() {
             : 'Signed in successfully!',
         )
         navigate({ to: '/' })
+        // Remove the queryKey entirely so next time the beforeLoad of `customers/route.tsx` runs it refetches new data
+        queryClient.removeQueries({
+          queryKey: convexQuery(api.user.getSignedInUser, {}).queryKey,
+        })
       },
       onError: ({ error: responseError }) => {
         setError('root', { message: responseError.message })
@@ -53,7 +61,9 @@ function RouteComponent() {
 
   return (
     <div className="w-full">
-      <Logo className="size-7" />
+      <Link to="/">
+        <Logo className="size-7" />
+      </Link>
       <h1 className="mt-2 font-semibold  text-xl/10">Sign in</h1>
       <p className="text-muted-fg text-sm/6">
         Welcome back! Sign in to continue shopping, track orders, and manage

@@ -51,7 +51,9 @@ function RouteComponent() {
 
   return (
     <div className="w-full">
-      <Logo className="size-7" />
+      <Link to="/">
+        <Logo className="size-7" />
+      </Link>
       <h1 className="mt-2 font-semibold text-xl/10">Forgot Password</h1>
       <p className="text-muted-fg text-sm/6">
         Enter your email address and we'll send you a link to reset your

@@ -58,3 +58,20 @@ export const setFlashCookie = createIsomorphicFn().server((data: {
 }) => {
   document.cookie = `toast=${encodeURIComponent(JSON.stringify(data))}; path=/; max-age=${60 * 5}`
 })
+
+
+export const getNameInitials = (name: string) => {
+  const names = name.trim().split(/\s+/).filter(Boolean);
+
+  if (names.length === 0) {
+    return "";
+  }
+
+  if (names.length > 1) {
+    const firstInitial = names[0].charAt(0);
+    const lastInitial = names[names.length - 1].charAt(0);
+    return `${firstInitial}${lastInitial}`.toUpperCase();
+  }
+
+  return names[0].slice(0, 2).toUpperCase();
+};

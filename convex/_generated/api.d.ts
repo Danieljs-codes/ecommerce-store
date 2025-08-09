@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as email from "../email.js";
 import type * as emails_forgotPassword from "../emails/forgotPassword.js";
 import type * as http from "../http.js";
+import type * as user from "../user.js";
 
 import type {
   ApiFromModules,
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   email: typeof email;
   "emails/forgotPassword": typeof emails_forgotPassword;
   http: typeof http;
+  user: typeof user;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
