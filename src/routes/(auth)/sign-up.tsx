@@ -34,7 +34,7 @@ function RouteComponent() {
   })
 
   const onSubmit = async (formInputData: SignUpSchema) => {
-    const _ = await authClient.signUp.email(formInputData, {
+    await authClient.signUp.email(formInputData, {
       onSuccess: ({ data }) => {
         const name = data?.user?.name as string
         toast.success(`Signed up successfully! Welcome, ${name}`)
