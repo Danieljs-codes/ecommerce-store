@@ -186,13 +186,6 @@ export default defineSchema({
       postalCode: v.optional(v.string()),
     }),
 
-    // Payment
-    paymentStatus: v.union(
-      v.literal('pending'),
-      v.literal('paid'),
-      v.literal('failed'),
-      v.literal('refunded'),
-    ),
     paymentProvider: v.optional(v.string()), // "paystack", "flutterwave"
     paymentReference: v.optional(v.string()),
 
@@ -204,7 +197,8 @@ export default defineSchema({
   })
     .index('by_user', ['userId'])
     .index('by_status', ['status'])
-    .index('by_order_number', ['orderNumber']),
+    .index('by_order_number', ['orderNumber'])
+    .index('by_created_at', ['createdAt']),
 
   order_items: defineTable({
     orderId: v.id('orders'),

@@ -4,6 +4,8 @@ import { createIsomorphicFn } from "@tanstack/react-start";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import type { ClassValue } from "clsx";
 
+// format a DateValue (CalendarDate/ZonedDateTime) to "DD Mon YYYY"
+
 export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
 }
@@ -75,3 +77,11 @@ export const getNameInitials = (name: string) => {
 
   return names[0].slice(0, 2).toUpperCase();
 };
+
+export const formatMoney = (amount: number) => {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+  }).format(amount / 100);
+};
+
