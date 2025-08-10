@@ -10,6 +10,7 @@ import {
 import { DateRangePicker } from '../ui/date-range-picker'
 import { LineChart } from '../ui/line-chart'
 import { Loader } from '../ui/loader'
+import { EmptyFile } from '../empty-file'
 import { MetricCard } from './metric-card'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
 import { formatMoney } from '@/lib/utils'
@@ -54,10 +55,11 @@ export const SalesMetrics = () => {
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="text-muted-fg text-sm">
+              <EmptyFile className="size-16" />
+              <div className="text-muted-fg text-sm font-medium mt-3">
                 No sales data available for the selected period
               </div>
-              <div className="text-muted-fg/70 text-xs mt-1">
+              <div className="text-muted-fg/70 text-[0.8125rem] mt-1">
                 Try selecting a different date range
               </div>
             </div>

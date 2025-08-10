@@ -205,13 +205,13 @@ export function AppNavbar({ user, ...props }: AppNavbarProps) {
   return (
     <NavbarProvider>
       <Navbar {...props}>
-        <NavbarStart>
+        <NavbarStart className="p-0 md:p-0">
           <Link
             className="flex items-center gap-x-2 font-medium"
             aria-label="Go to homepage"
             to="/"
           >
-            <Logo />
+            <Logo className="size-7" />
           </Link>
         </NavbarStart>
         <NavbarGap />

@@ -81,7 +81,7 @@ export default function AppSidebar(
             </SidebarLink>
 
             <SidebarLink
-              isCurrent={pathname.toLowerCase() === '/admin/products'}
+              isCurrent={pathname.startsWith('/admin/products')}
               to="/admin/products"
               tooltip="Products"
             >

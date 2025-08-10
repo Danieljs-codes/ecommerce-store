@@ -4,14 +4,16 @@ import {
   Scripts,
   createRootRouteWithContext,
   useRouteContext,
+  useRouterState,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { createServerFn } from '@tanstack/react-start'
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react'
 import { getCookie, getWebRequest } from '@tanstack/react-start/server'
 import { ThemeProvider } from 'next-themes'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import nProgress from 'nprogress'
 import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import type { ConvexReactClient } from 'convex/react'
@@ -109,6 +111,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function InnerComponent({ children }: { children: React.ReactNode }) {
+  const router = useRouterState({
+    select: (state) => ({
+      pathname: state.location.pathname,
+      status: state.status,
+    }),
+  })
+  const pathnameRef = useRef(router.pathname)
   const { cookie } = Route.useRouteContext()
 
   useEffect(() => {
@@ -121,6 +130,23 @@ function InnerComponent({ children }: { children: React.ReactNode }) {
       0,
     )
   }, [cookie])
+
+  useEffect(() => {
+    const currentPathname = router.pathname
+    const pathnameChanged = currentPathname !== pathnameRef.current
+
+    nProgress.configure({
+      showSpinner: false,
+    })
+    if (pathnameChanged && router.status === 'pending') {
+      nProgress.start()
+      pathnameRef.current = currentPathname
+    }
+
+    if (router.status === 'idle') {
+      nProgress.done()
+    }
+  }, [])
 
   return <>{children}</>
 }
