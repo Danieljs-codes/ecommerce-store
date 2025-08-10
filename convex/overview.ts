@@ -71,9 +71,7 @@ export const getOverviewData = query({
 
 export const getRecentSalesData = query({
   args: {
-    // Date
     from: v.number(),
-    // Date
     to: v.number(),
   },
   handler: async (ctx, args) => {
@@ -84,19 +82,16 @@ export const getRecentSalesData = query({
     const { from, to } = args
     if (from > to) throw new ConvexError('Invalid date range: from > to')
 
-    // Fetch orders in range
     const ordersInRange = await ctx.db
       .query('orders')
       .withIndex('by_created_at', (q) => q.gte('createdAt', from))
       .filter((q) => q.lte(q.field('createdAt'), to))
       .collect()
 
-  // Count only orders that represent sales
   const saleOrders = ordersInRange.filter((o) => SALE_STATUS_SET.has(o.status as SaleStatus))
 
 
 
-    // Daily series (UTC) using arithmetic bucketing
     const MS_PER_DAY = 24 * 60 * 60 * 1000
     const startOfDayUTC = (ts: number) => Math.floor(ts / MS_PER_DAY) * MS_PER_DAY
 
@@ -113,7 +108,6 @@ export const getRecentSalesData = query({
       }
     }
 
-    // Early return can share the same computation since earnings is zero-filled
     const dailyEarnings = Array.from({ length: numDays }, (_, i) => ({
       day: startDay + i * MS_PER_DAY,
       earnings: earnings[i],
@@ -154,9 +148,8 @@ export const getRecentSalesData = query({
       .slice(0, 5)
 
     return {
-      dailyEarnings, // [{ day: msUTCStartOfDay, earnings }]
-      topProducts, // top 5 [{ productId, productName, quantity, revenue }]
+      dailyEarnings,
+      topProducts,
     }
   },
 })
-// ...existing code...
