@@ -27,6 +27,7 @@ import {
 } from '@tabler/icons-react'
 import { Button } from './button'
 import { Tooltip } from './tooltip'
+import { Keyboard } from './keyboard'
 import type {
   ButtonProps,
   DisclosureGroupProps,
@@ -654,33 +655,50 @@ const SidebarTrigger = ({
   children,
   ...props
 }: React.ComponentProps<typeof Button>) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state } = useSidebar()
   return (
-    <Button
-      aria-label={props['aria-label'] || 'Toggle Sidebar'}
-      data-sidebar-trigger="true"
-      intent={props.intent || 'plain'}
-      size={props.size || 'sq-sm'}
-      onPress={(event) => {
-        onPress?.(event)
-        toggleSidebar()
-      }}
-      {...props}
-    >
-      {children || (
-        <>
-          <IconLayoutSidebarFilled
-            data-slot="icon"
-            className="hidden md:inline"
-          />
-          <IconLayoutSidebarLeftExpandFilled
-            data-slot="icon"
-            className="inline md:hidden"
-          />
-          <span className="sr-only">Toggle Sidebar</span>
-        </>
-      )}
-    </Button>
+    <Tooltip>
+      <Button
+        aria-label={props['aria-label'] || 'Toggle Sidebar'}
+        data-sidebar-trigger="true"
+        intent={props.intent || 'plain'}
+        size={props.size || 'sq-sm'}
+        onPress={(event) => {
+          onPress?.(event)
+          toggleSidebar()
+        }}
+        {...props}
+      >
+        {children || (
+          <>
+            <IconLayoutSidebarFilled
+              data-slot="icon"
+              className="hidden md:inline"
+            />
+            <IconLayoutSidebarLeftExpandFilled
+              data-slot="icon"
+              className="inline md:hidden"
+            />
+            <span className="sr-only">Toggle Sidebar</span>
+          </>
+        )}
+      </Button>
+      <Tooltip.Content showArrow={false} className="text-xs" intent="inverse">
+        <Keyboard
+          classNames={{
+            base: 'gap-0.5',
+          }}
+          keys={
+            navigator.userAgent.includes('Mac')
+              ? ['⌘', '\\']
+              : ['Ctrl', '+', '\\']
+          }
+        />
+        {' to '}
+        {state === 'collapsed' ? 'expand' : 'collapse'}
+        {' sidebar'}
+      </Tooltip.Content>
+    </Tooltip>
   )
 }
 

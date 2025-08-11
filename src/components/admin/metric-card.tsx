@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 interface MetricCardProps {
   title: string
-  description: string
+  description?: string
   action?: ReactNode
   classNames?: {
     header?: string
@@ -29,11 +29,13 @@ export function MetricCard({
         <Card.Title className={cn('text-base/5', classNames?.title)}>
           {title}
         </Card.Title>
-        <Card.Description
-          className={cn('text-sm/5.5 text-muted-fg', classNames?.description)}
-        >
-          {description}
-        </Card.Description>
+        {description && (
+          <Card.Description
+            className={cn('text-sm/5.5 text-muted-fg', classNames?.description)}
+          >
+            {description}
+          </Card.Description>
+        )}
         {action && (
           <Card.Action
             className={cn('hidden self-end sm:grid', classNames?.action)}

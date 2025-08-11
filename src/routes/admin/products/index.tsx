@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { IconSquarePlus } from '@intentui/icons'
 import { Heading } from '@/components/ui/heading'
 import { buttonStyles } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
+import PlusSignSquareIcon from '@/components/icons/plus-size-square-icon'
 
 export const Route = createFileRoute('/admin/products/')({
   loader: () => {
@@ -17,9 +17,9 @@ function RouteComponent() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <Heading className="sm:text-xl mb-6">Products</Heading>
+        <Heading className="sm:text-xl">Products</Heading>
         <Link to="/admin/products/new" className={buttonStyles()}>
-          <IconSquarePlus />
+          <PlusSignSquareIcon data-slot="icon" />
           New
         </Link>
       </div>

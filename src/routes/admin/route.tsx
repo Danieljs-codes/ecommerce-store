@@ -43,7 +43,7 @@ function RouteComponent() {
       : 'Dashboard'
 
   return (
-    <SidebarProvider>
+    <SidebarProvider shortcut="\">
       <AppSidebar collapsible="dock" />
       <SidebarInset>
         <AppSidebarNav title={title} />
