@@ -35,7 +35,7 @@ function RouteComponent() {
         >
           <div className="flex flex-col gap-6">
             <TextField label="Product Name" />
-            <RichTextEditor />
+            <RichTextEditor label="Product Description" />
             {/* <TextField label="Product Description" /> */}
             <NumberField
               label="Product Price"
