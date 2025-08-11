@@ -14,6 +14,8 @@ import { MetricCard } from './metric-card'
 import { RichTextEditor } from './rich-text-editor'
 import type { ProductFormData } from '@/lib/schema'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
+import { useId } from 'react'
+import { Badge } from '../ui/badge'
 
 const formatOptions = {
   style: 'currency',
@@ -28,6 +30,7 @@ export const ProductBasicsStep = () => {
   const { data: categories } = useSuspenseQueryDeferred(
     convexQuery(api.categories.getExistingCategories, {}),
   )
+  useId()
 
   const { control, watch, setValue } = useFormContext<ProductFormData>()
 
@@ -216,44 +219,80 @@ export const ProductBasicsStep = () => {
           <p className="text-muted-fg text-sm/5.5 group-disabled:opacity-50 mt-2 block sm:text-xs">
             Supports PNG, JPG, and WEBP formats. Maximum 2MB per image.
           </p>
-        </MetricCard>
-        {uploadedImages.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {uploadedImages.map((img) => {
-              const imageUrl = URL.createObjectURL(img)
-              return (
-                <MetricCard
-                  classNames={{
-                    card: 'size-32 md:size-40 flex',
-                    content: 'p-0 overflow-hidden flex-1 flex isolate relative',
-                  }}
-                  key={img.name}
-                >
-                  <img
-                    src={imageUrl}
-                    alt={img.name}
-                    className="w-full h-full object-cover flex-shrink-0"
-                    onLoad={() => URL.revokeObjectURL(imageUrl)}
-                  />
-                  <UIButton
-                    size="sq-xs"
-                    intent="danger"
-                    className="absolute top-1 right-1 z-10 rounded-full"
-                    onPress={() => {
-                      setValue(
-                        'images',
-                        uploadedImages.filter((file) => file.name !== img.name),
-                      )
-                      URL.revokeObjectURL(imageUrl)
+          {uploadedImages.length > 0 ? (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {uploadedImages.map((img) => {
+                const imageUrl = URL.createObjectURL(img)
+                return (
+                  <MetricCard
+                    classNames={{
+                      card: 'size-32 md:size-40 flex',
+                      content:
+                        'p-0 overflow-hidden flex-1 flex isolate relative',
                     }}
+                    key={img.name}
                   >
-                    <IconCircleXFill />
-                  </UIButton>
-                </MetricCard>
-              )
-            })}
+                    <img
+                      src={imageUrl}
+                      alt={img.name}
+                      className="w-full h-full object-cover flex-shrink-0"
+                      onLoad={() => URL.revokeObjectURL(imageUrl)}
+                    />
+                    <UIButton
+                      size="sq-xs"
+                      intent="danger"
+                      className="absolute top-1 right-1 z-10 rounded-full"
+                      onPress={() => {
+                        setValue(
+                          'images',
+                          uploadedImages.filter(
+                            (file) => file.name !== img.name,
+                          ),
+                        )
+                        URL.revokeObjectURL(imageUrl)
+                      }}
+                    >
+                      <IconCircleXFill />
+                    </UIButton>
+                  </MetricCard>
+                )
+              })}
+            </div>
+          ) : null}
+          <div className="mt-4">
+            <Controller
+              control={control}
+              name="tags"
+              render={({ field, fieldState }) => (
+                <>
+                  <TextField
+                    label="Tags"
+                    placeholder="Add tags, separated by commas"
+                    value={field.value?.join(', ')}
+                    onChange={(value) => {
+                      const tags = value.split(',').map((tag) => tag.trim())
+                      field.onChange(tags)
+                    }}
+                  />
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {field.value?.filter(Boolean).map((tag) => (
+                      <Badge key={tag}>
+                        {tag}
+                        <IconCircleXFill
+                          onClick={() => {
+                            field.onChange(
+                              field.value?.filter((t) => t !== tag),
+                            )
+                          }}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                </>
+              )}
+            />
           </div>
-        ) : null}
+        </MetricCard>
       </div>
     </>
   )
