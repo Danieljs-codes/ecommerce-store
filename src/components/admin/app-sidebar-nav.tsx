@@ -1,17 +1,27 @@
 'use client'
 
 import {
+  IconCircleHalf,
   IconCommandRegular,
   IconDashboard,
-  IconLogout,
   IconSettings,
 } from '@intentui/icons'
 import { IconMinusVertical } from '@tabler/icons-react'
+import { useTheme } from 'next-themes'
+import { IconLogoutSquare } from '../icons/logout-square'
+import type { Doc } from '@convex/_generated/dataModel'
 import { Avatar } from '@/components/ui/avatar'
 import { Menu } from '@/components/ui/menu'
 import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
+import { getNameInitials } from '@/lib/utils'
 
-export default function AppSidebarNav({ title }: { title: string }) {
+export default function AppSidebarNav({
+  title,
+  user,
+}: {
+  title: string
+  user: Doc<'users'>
+}) {
   return (
     <SidebarNav>
       <span className="flex items-center gap-x-0">
@@ -23,26 +33,29 @@ export default function AppSidebarNav({ title }: { title: string }) {
           </span>
         </div>
       </span>
-      <UserMenu />
+      <UserMenu user={user} />
     </SidebarNav>
   )
 }
 
-function UserMenu() {
+function UserMenu({ user }: { user: Doc<'users'> }) {
+  const { theme, setTheme } = useTheme()
   return (
     <Menu>
       <Menu.Trigger className="ml-auto md:hidden" aria-label="Open Menu">
         <Avatar
           isSquare
-          alt="kurt cobain"
-          src="https://intentui.com/images/avatar/cobain.jpg"
+          alt={user.name}
+          initials={getNameInitials(user.name)}
         />
       </Menu.Trigger>
       <Menu.Content popover={{ placement: 'bottom end' }} className="min-w-64">
         <Menu.Section>
           <Menu.Header separator>
-            <span className="block">Kurt Cobain</span>
-            <span className="font-normal text-muted-fg">@cobain</span>
+            <span className="block capitalize">{user.name.toLowerCase()}</span>
+            <span className="font-normal text-muted-fg lowercase">
+              {user.email.toLowerCase()}
+            </span>
           </Menu.Header>
         </Menu.Section>
         <Menu.Item href="#dashboard">
@@ -59,12 +72,24 @@ function UserMenu() {
           <Menu.Label>Command Menu</Menu.Label>
         </Menu.Item>
         <Menu.Separator />
-        <Menu.Item href="#contact-s">
-          <Menu.Label>Contact Support</Menu.Label>
+        <Menu.Item
+          className="capitalize"
+          onAction={() =>
+            setTheme(
+              theme === 'light'
+                ? 'dark'
+                : theme === 'dark'
+                  ? 'system'
+                  : 'light',
+            )
+          }
+        >
+          <IconCircleHalf />
+          Switch Theme ({theme})
         </Menu.Item>
         <Menu.Separator />
         <Menu.Item href="#logout">
-          <IconLogout />
+          <IconLogoutSquare />
           <Menu.Label>Log out</Menu.Label>
         </Menu.Item>
       </Menu.Content>

@@ -48,7 +48,7 @@ function RouteComponent() {
     <SidebarProvider shortcut="\">
       <AppSidebar user={user} collapsible="dock" />
       <SidebarInset>
-        <AppSidebarNav title={title} />
+        <AppSidebarNav title={title} user={user} />
         <Container className="p-4 lg:p-6 max-w- mx-auto py-0">
           <Outlet />
         </Container>
