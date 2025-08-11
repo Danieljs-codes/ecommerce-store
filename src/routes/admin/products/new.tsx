@@ -59,6 +59,7 @@ function RouteComponent() {
       hasVariants: false,
       status: 'draft' as const,
       stockCount: 0,
+      categoryId: '',
     },
     mode: 'onChange',
   })

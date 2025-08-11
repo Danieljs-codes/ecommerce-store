@@ -14,7 +14,7 @@ import { MetricCard } from './metric-card'
 import { RichTextEditor } from './rich-text-editor'
 import type { ProductFormData } from '@/lib/schema'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
-import { useId } from 'react'
+import { useEffect, useId } from 'react'
 import { Badge } from '../ui/badge'
 
 const formatOptions = {
@@ -32,9 +32,18 @@ export const ProductBasicsStep = () => {
   )
   useId()
 
-  const { control, watch, setValue } = useFormContext<ProductFormData>()
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useFormContext<ProductFormData>()
 
   const uploadedImages = watch('images')
+
+  useEffect(() => {
+    console.log(errors)
+  }, [errors])
 
   return (
     <>
@@ -131,28 +140,53 @@ export const ProductBasicsStep = () => {
                 }
                 className="group/drop-zone relative z-10 flex max-h-56 items-center justify-center overflow-hidden rounded-lg p-6"
                 onDrop={async (e) => {
-                  const item = e.items
+                  // Filter for valid image files
+                  const imageItems = e.items
                     .filter(isFileDropItem)
-                    .find(
+                    .filter(
                       (dropItem) =>
                         dropItem.type === 'image/jpeg' ||
                         dropItem.type === 'image/png' ||
                         dropItem.type === 'image/webp',
                     )
-                  if (!item) return
-                  const file = await item.getFile()
 
-                  const existingFiles = field.value
-                  const isDuplicate = existingFiles.some(
-                    (existing) => existing.name === file.name,
+                  if (imageItems.length === 0) return
+
+                  // Get all dropped files
+                  const files = await Promise.all(
+                    imageItems.map((item) => item.getFile()),
                   )
 
-                  if (isDuplicate) {
-                    toast.error(`File "${file.name}" is already uploaded`)
-                    return
+                  const existingFiles = field.value
+                  const newFiles: Array<File> = []
+                  const duplicateFiles: Array<string> = []
+
+                  files.forEach((file) => {
+                    const isDuplicate = existingFiles.some(
+                      (existing) => existing.name === file.name,
+                    )
+                    if (isDuplicate) {
+                      duplicateFiles.push(file.name)
+                    } else {
+                      newFiles.push(file)
+                    }
+                  })
+
+                  if (duplicateFiles.length > 0) {
+                    if (duplicateFiles.length === 1) {
+                      toast.error(
+                        `File "${duplicateFiles[0]}" is already uploaded`,
+                      )
+                    } else {
+                      toast.error(
+                        `${duplicateFiles.length} files are already uploaded`,
+                      )
+                    }
                   }
 
-                  field.onChange([...field.value, file])
+                  if (newFiles.length > 0) {
+                    field.onChange([...field.value, ...newFiles])
+                  }
                 }}
               >
                 <div className="grid space-y-3 py-6">
@@ -219,6 +253,11 @@ export const ProductBasicsStep = () => {
           <p className="text-muted-fg text-sm/5.5 group-disabled:opacity-50 mt-2 block sm:text-xs">
             Supports PNG, JPG, and WEBP formats. Maximum 2MB per image.
           </p>
+          {errors.images && (
+            <p className="text-base/6 text-danger group-disabled:opacity-50 sm:text-sm/6 forced-colors:text-[Mark]">
+              {errors.images.message}
+            </p>
+          )}
           {uploadedImages.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-2">
               {uploadedImages.map((img) => {
@@ -248,6 +287,9 @@ export const ProductBasicsStep = () => {
                           uploadedImages.filter(
                             (file) => file.name !== img.name,
                           ),
+                          {
+                            shouldValidate: true,
+                          },
                         )
                         URL.revokeObjectURL(imageUrl)
                       }}
@@ -263,26 +305,30 @@ export const ProductBasicsStep = () => {
             <Controller
               control={control}
               name="tags"
-              render={({ field, fieldState }) => (
+              render={({
+                field: { value, onChange, ...field },
+                fieldState,
+              }) => (
                 <>
                   <TextField
                     label="Tags"
                     placeholder="Add tags, separated by commas"
-                    value={field.value?.join(', ')}
+                    value={value?.join(', ')}
                     onChange={(value) => {
                       const tags = value.split(',').map((tag) => tag.trim())
-                      field.onChange(tags)
+                      onChange(tags)
                     }}
+                    {...field}
+                    isInvalid={fieldState.invalid}
+                    errorMessage={fieldState.error?.message}
                   />
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {field.value?.filter(Boolean).map((tag) => (
-                      <Badge key={tag}>
-                        {tag}
+                    {value?.filter(Boolean).map((tag) => (
+                      <Badge key={tag} className="capitalize">
+                        {tag.toLowerCase()}
                         <IconCircleXFill
                           onClick={() => {
-                            field.onChange(
-                              field.value?.filter((t) => t !== tag),
-                            )
+                            onChange(value?.filter((t) => t !== tag))
                           }}
                         />
                       </Badge>

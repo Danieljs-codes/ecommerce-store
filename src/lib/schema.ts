@@ -28,19 +28,21 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>
 
-export const resetPasswordSchema = z.object({
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
-  confirmPassword: z.string().min(8, 'Confirm Password is required'),
-}).superRefine(({ password, confirmPassword }, ctx) => {
-  if (password !== confirmPassword) {
-    // Only add error to confirmPassword field
-    ctx.addIssue({
-      code: "custom",
-      message: 'Passwords must match',
-      path: ['confirmPassword'],
-    })
-  }
-})
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, 'Password must be at least 8 characters long'),
+    confirmPassword: z.string().min(8, 'Confirm Password is required'),
+  })
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      // Only add error to confirmPassword field
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Passwords must match',
+        path: ['confirmPassword'],
+      })
+    }
+  })
 
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>
 
@@ -49,9 +51,19 @@ export const productDetailsSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters'),
   basePrice: z.number().min(100, 'Price must be at least ₦1 (100 kobo)'),
   description: z.string().optional(),
-  categoryId: z.string().optional(),
+  categoryId: z.string().min(1, 'Category is required'),
   tags: z.array(z.string()),
-  images: z.array(z.file()).min(1, 'At least one image is required'),
+  images: z
+    .array(
+      z
+        .file()
+        .refine(
+          (file) => file.size <= 2 * 1024 * 1024, // 2MB
+          { message: 'Each image must be less than 2MB' },
+        )
+        .mime(['image/png', 'image/jpeg', 'image/webp']),
+    )
+    .min(1, 'At least one image is required'),
 })
 
 // Step 2: Variants & Publishing (combines variants + publish)
@@ -59,13 +71,17 @@ export const productVariantsPublishSchema = z.object({
   hasVariants: z.boolean(),
   variantOptions: z.array(z.string()).optional(),
   stockCount: z.number().min(0).optional(), // For simple products
-  variants: z.array(z.object({
-    variantCode: z.string(),
-    options: z.record(z.string(), z.string()),
-    stockCount: z.number().min(0),
-    price: z.number().optional(),
-    sku: z.string().optional(),
-  })).optional(),
+  variants: z
+    .array(
+      z.object({
+        variantCode: z.string(),
+        options: z.record(z.string(), z.string()),
+        stockCount: z.number().min(0),
+        price: z.number().optional(),
+        sku: z.string().optional(),
+      }),
+    )
+    .optional(),
   status: z.enum(['draft', 'active', 'scheduled']),
   publishAt: z.number().optional(),
   metaTitle: z.string().optional(),
