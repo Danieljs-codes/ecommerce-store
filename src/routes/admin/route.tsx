@@ -10,6 +10,7 @@ import { setFlashCookie } from '@/lib/utils'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/admin/app-sidebar'
 import AppSidebarNav from '@/components/admin/app-sidebar-nav'
+import { Container } from '@/components/ui/container'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async ({ context }) => {
@@ -47,9 +48,9 @@ function RouteComponent() {
       <AppSidebar collapsible="dock" />
       <SidebarInset>
         <AppSidebarNav title={title} />
-        <div className="p-4 lg:p-6">
+        <Container className="p-4 lg:p-6 max-w- mx-auto py-0">
           <Outlet />
-        </div>
+        </Container>
       </SidebarInset>
     </SidebarProvider>
   )

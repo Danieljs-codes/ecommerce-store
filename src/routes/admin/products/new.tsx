@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { IconCircleChevronLeftFilled } from '@tabler/icons-react'
+import { defineStepper } from '@stepperize/react'
 import { buttonStyles } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
-import { MetricCard } from '@/components/admin/metric-card'
-import { TextField } from '@/components/ui/text-field'
-import { NumberField } from '@/components/ui/number-field'
-import { RichTextEditor } from '@/components/admin/rich-text-editor'
+import { ProductBasicsStep } from '@/components/admin/product-basics-step'
+import { StepperHeader } from '@/components/admin/stepper-header'
+
+// steppers/product-stepper.tsx
 
 export const Route = createFileRoute('/admin/products/new')({
   loader: () => {
@@ -15,6 +16,29 @@ export const Route = createFileRoute('/admin/products/new')({
   },
   component: RouteComponent,
 })
+
+export const ProductStepper = defineStepper(
+  {
+    id: 'basics',
+    title: 'Basic Information',
+    description: 'Product name, description, and pricing',
+  },
+  {
+    id: 'images',
+    title: 'Product Images',
+    description: 'Upload product photos',
+  },
+  {
+    id: 'variants',
+    title: 'Variants & Inventory',
+    description: 'Configure product variants and stock',
+  },
+  {
+    id: 'publish',
+    title: 'SEO & Publishing',
+    description: 'Publish settings and SEO optimization',
+  },
+)
 
 function RouteComponent() {
   return (
@@ -28,31 +52,13 @@ function RouteComponent() {
           Back
         </Link>
       </div>
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-        <MetricCard
-          title="Basic Information"
-          description="Enter the basic information for the product."
-        >
-          <div className="flex flex-col gap-6">
-            <TextField label="Product Name" />
-            <RichTextEditor label="Product Description" />
-            {/* <TextField label="Product Description" /> */}
-            <NumberField
-              label="Product Price"
-              defaultValue={1000}
-              className="tabular-nums"
-              formatOptions={{
-                style: 'currency',
-                currency: 'NGN',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-                compactDisplay: 'short',
-                currencyDisplay: 'narrowSymbol',
-              }}
-              step={500}
-            />
-          </div>
-        </MetricCard>
+      <div className="mt-8">
+        <StepperHeader />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <ProductStepper.Scoped>
+            <ProductBasicsStep />
+          </ProductStepper.Scoped>
+        </div>
       </div>
     </div>
   )

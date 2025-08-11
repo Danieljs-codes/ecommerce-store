@@ -1,6 +1,5 @@
 import { EditorContent, useEditor } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
-import { Underline } from '@tiptap/extension-underline'
 import {
   IconBoldFill,
   IconBulletListFill,
@@ -30,8 +29,9 @@ export const RichTextEditor = ({ label }: RichTextEditorProps) => {
         heading: false,
         blockquote: false,
         codeBlock: false,
+        link: false,
+        dropcursor: false,
       }),
-      Underline, // Add underline extension
     ],
     immediatelyRender: false,
     content: `
