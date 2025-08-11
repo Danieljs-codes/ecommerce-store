@@ -26,7 +26,7 @@ export const createRouter = () => {
     },
   })
 
-  // convexQueryClient.connect(queryClient)
+  convexQueryClient.connect(queryClient)
 
   const router = createTanstackRouter({
     routeTree,

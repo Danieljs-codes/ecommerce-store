@@ -1,15 +1,28 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { IconCircleChevronLeftFilled } from '@tabler/icons-react'
-import { defineStepper } from '@stepperize/react'
+import { FormProvider, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod/v4'
+import { convexQuery } from '@convex-dev/react-query'
+import { api } from '@convex/_generated/api'
+import type { ProductFormData } from '@/lib/schema'
 import { buttonStyles } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
-import { ProductBasicsStep } from '@/components/admin/product-basics-step'
+import { productFormSchema } from '@/lib/schema'
 import { StepperHeader } from '@/components/admin/stepper-header'
+import { ProductBasicsStep } from '@/components/admin/product-basics-step'
+import { StepperNavigation } from '@/components/admin/stepper-navigation'
 
-// steppers/product-stepper.tsx
+const searchParamSchema = z.object({
+  step: z.union([z.literal(1), z.literal(2)]).default(1),
+})
 
 export const Route = createFileRoute('/admin/products/new')({
-  loader: () => {
+  validateSearch: searchParamSchema,
+  loader: async ({ context }) => {
+    context.queryClient.ensureQueryData(
+      convexQuery(api.categories.getExistingCategories, {}),
+    )
     return {
       title: 'New Product',
     }
@@ -17,33 +30,52 @@ export const Route = createFileRoute('/admin/products/new')({
   component: RouteComponent,
 })
 
-export const ProductStepper = defineStepper(
+const steps: Array<{ id: 1 | 2; title: string; description: string }> = [
   {
-    id: 'basics',
-    title: 'Basic Information',
-    description: 'Product name, description, and pricing',
+    id: 1,
+    title: 'Product Details',
+    description: 'Basic information and images',
   },
   {
-    id: 'images',
-    title: 'Product Images',
-    description: 'Upload product photos',
+    id: 2,
+    title: 'Variants & Publishing',
+    description: 'Inventory, variants, and publish settings',
   },
-  {
-    id: 'variants',
-    title: 'Variants & Inventory',
-    description: 'Configure product variants and stock',
-  },
-  {
-    id: 'publish',
-    title: 'SEO & Publishing',
-    description: 'Publish settings and SEO optimization',
-  },
-)
+]
 
 function RouteComponent() {
+  const navigate = Route.useNavigate()
+  const currentStep = Route.useSearch({
+    select: (s) => s.step,
+  })
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      name: '',
+      basePrice: 0,
+      description: '',
+      tags: [],
+      images: [],
+      hasVariants: false,
+      status: 'draft' as const,
+      stockCount: 0,
+    },
+    mode: 'onChange',
+  })
+
+  const goToStep = (stepNumber: 1 | 2) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        step: stepNumber,
+      }),
+      replace: true,
+    })
+  }
+
   return (
     <div>
-      <div>
+      <div className="mb-8">
         <Link
           to=".."
           className={buttonStyles({ size: 'sm', intent: 'outline' })}
@@ -52,14 +84,31 @@ function RouteComponent() {
           Back
         </Link>
       </div>
-      <div className="mt-8">
-        <StepperHeader />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <ProductStepper.Scoped>
-            <ProductBasicsStep />
-          </ProductStepper.Scoped>
+      <FormProvider {...form}>
+        <div className="space-y-8">
+          {/* Step Header */}
+          <StepperHeader
+            steps={steps}
+            currentStep={currentStep}
+            onStepClick={goToStep}
+          />
+
+          {/* Step Content */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {currentStep === 1 && <ProductBasicsStep />}
+            {/* {currentStep === 2 && <ProductVariantsPublishStep />} */}
+          </div>
+
+          {/* Navigation  */}
+          <StepperNavigation
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            onNext={() => goToStep((currentStep + 1) as 1 | 2)}
+            onPrev={() => goToStep((currentStep - 1) as 1 | 2)}
+            form={form}
+          />
         </div>
-      </div>
+      </FormProvider>
     </div>
   )
 }

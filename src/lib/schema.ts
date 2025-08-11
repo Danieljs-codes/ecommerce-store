@@ -43,3 +43,39 @@ export const resetPasswordSchema = z.object({
 })
 
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>
+
+// Step 1: Product Details (combines basics + images)
+export const productDetailsSchema = z.object({
+  name: z.string().min(3, 'Product name must be at least 3 characters'),
+  basePrice: z.number().min(100, 'Price must be at least ₦1 (100 kobo)'),
+  description: z.string().optional(),
+  categoryId: z.string().optional(),
+  tags: z.array(z.string()),
+  images: z.array(z.string()).min(1, 'At least one image is required'),
+})
+
+// Step 2: Variants & Publishing (combines variants + publish)
+export const productVariantsPublishSchema = z.object({
+  hasVariants: z.boolean(),
+  variantOptions: z.array(z.string()).optional(),
+  stockCount: z.number().min(0).optional(), // For simple products
+  variants: z.array(z.object({
+    variantCode: z.string(),
+    options: z.record(z.string(), z.string()),
+    stockCount: z.number().min(0),
+    price: z.number().optional(),
+    sku: z.string().optional(),
+  })).optional(),
+  status: z.enum(['draft', 'active', 'scheduled']),
+  publishAt: z.number().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+})
+
+// Combined schema
+export const productFormSchema = z.object({
+  ...productDetailsSchema.shape,
+  ...productVariantsPublishSchema.shape,
+})
+
+export type ProductFormData = z.infer<typeof productFormSchema>

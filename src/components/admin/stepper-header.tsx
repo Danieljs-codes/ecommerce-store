@@ -1,48 +1,47 @@
-import { ProductStepper } from '@/routes/admin/products/new'
-
-export function StepperHeader() {
-  const { current } = ProductStepper.useStepper()
-  const allSteps = ProductStepper.utils.getAll()
-  const currentIndex = allSteps.findIndex((step) => step.id === current.id)
-
+export function StepperHeader({
+  steps,
+  currentStep,
+  onStepClick,
+}: {
+  steps: Array<{ id: 1 | 2; title: string; description: string }>
+  currentStep: number
+  onStepClick: (step: 1 | 2) => void
+}) {
   return (
     <div className="mb-8">
-      {/* Mobile progress bar - only visible on small screens */}
+      {/* Mobile progress bar */}
       <div className="sm:hidden mb-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-muted-fg">
-            Step {currentIndex + 1} of {allSteps.length}
+            Step {currentStep} of {steps.length}
           </span>
           <span className="text-sm text-muted-fg">
-            {Math.round(((currentIndex + 1) / allSteps.length) * 100)}%
+            {Math.round((currentStep / steps.length) * 100)}%
           </span>
         </div>
-
-        <div className="w-full bg-muted rounded-full h-2 mb-3">
+        <div className="w-full bg-muted rounded-full h-2">
           <div
             className="bg-primary h-2 rounded-full transition-all duration-300"
-            style={{
-              width: `${((currentIndex + 1) / allSteps.length) * 100}%`,
-            }}
+            style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
-        </div>
-
-        <div className="text-center">
-          <h2 className="text-lg font-semibold">{current.title}</h2>
-          <p className="text-sm text-muted-fg">{current.description}</p>
         </div>
       </div>
 
-      {/* Desktop stepper - hidden on small screens */}
+      {/* Desktop stepper */}
       <div className="hidden sm:block">
-        <div className="flex items-center justify-between">
-          {allSteps.map((step, index) => {
-            const isActive = current.id === step.id
-            const isCompleted = index < currentIndex
+        <div className="flex items-center">
+          {steps.map((step, index) => {
+            const isActive = currentStep === step.id
+            const isCompleted = currentStep > step.id
+            const isClickable = currentStep >= step.id
 
             return (
               <div key={step.id} className="flex items-center flex-1">
-                <div className="flex items-center">
+                <button
+                  onClick={() => isClickable && onStepClick(step.id)}
+                  disabled={!isClickable}
+                  className="flex items-center disabled:cursor-not-allowed"
+                >
                   <div
                     className={`
                       w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors
@@ -68,27 +67,27 @@ export function StepperHeader() {
                         />
                       </svg>
                     ) : (
-                      index + 1
+                      step.id
                     )}
                   </div>
 
-                  {/* Step labels - hide on medium screens, show on large */}
-                  <div className="ml-3 min-w-0 hidden lg:block">
+                  <div className="ml-3 text-left">
                     <p
-                      className={`text-sm font-medium ${isActive ? 'text-foreground' : 'text-muted-fg'}`}
+                      className={`text-sm font-medium ${
+                        isActive ? 'text-fg' : 'text-muted-fg'
+                      }`}
                     >
                       {step.title}
                     </p>
                     <p className="text-xs text-muted-fg">{step.description}</p>
                   </div>
-                </div>
+                </button>
 
-                {/* Connector line */}
-                {index < allSteps.length - 1 && (
-                  <div className="flex-1 mx-3 lg:mx-4">
+                {index < steps.length - 1 && (
+                  <div className="flex-1 mx-4">
                     <div
                       className={`h-px transition-colors ${
-                        index < currentIndex ? 'bg-primary' : 'bg-border'
+                        isCompleted ? 'bg-primary' : 'bg-border'
                       }`}
                     />
                   </div>
@@ -96,12 +95,6 @@ export function StepperHeader() {
               </div>
             )
           })}
-        </div>
-
-        {/* Current step info for medium screens (when labels are hidden) */}
-        <div className="lg:hidden mt-4 text-center">
-          <h2 className="text-lg font-semibold">{current.title}</h2>
-          <p className="text-sm text-muted-fg">{current.description}</p>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { EditorContent, useEditor } from '@tiptap/react'
 import { StarterKit } from '@tiptap/starter-kit'
+import { Underline } from '@tiptap/extension-underline'
 import {
   IconBoldFill,
   IconBulletListFill,
@@ -20,9 +21,21 @@ import { useMediaQuery } from '@/hooks/use-media-query'
 
 interface RichTextEditorProps {
   label?: string
+  value?: string
+  onChange?: (value: string) => void
+  isRequired?: boolean
+  isInvalid?: boolean
+  errorMessage?: string
 }
 
-export const RichTextEditor = ({ label }: RichTextEditorProps) => {
+export const RichTextEditor = ({
+  label,
+  value = '',
+  onChange,
+  isRequired = false,
+  isInvalid = false,
+  errorMessage,
+}: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -32,46 +45,57 @@ export const RichTextEditor = ({ label }: RichTextEditorProps) => {
         link: false,
         dropcursor: false,
       }),
+      Underline,
     ],
     immediatelyRender: false,
-    content: `
-        <p>Some <strong>bold</strong> and <em>italic</em> and <u>underlined</u> text.</p>
-        <ul>
-          <li>A bullet list item</li>
-          <li>And another one</li>
-        </ul>
-        <ol>
-          <li>A numbered list item</li>
-          <li>And another one</li>
-        </ol>
-      `,
+    content: value,
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML()
+      if (html !== value) {
+        onChange?.(html)
+      }
+    },
     editorProps: {
       attributes: {
         class: cn([
           'prose prose-sm max-w-none',
           'field-sizing-content min-h-32 w-full min-w-0 px-2.5 py-2 text-base placeholder-muted-fg outline-hidden sm:text-sm/6',
-          // Remove border and shadow since it's now inside the container
         ]),
       },
     },
   })
 
+  // Update editor content when value prop changes
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value, { emitUpdate: false })
+    }
+  }, [editor, value])
+
   return (
     <div className="group flex flex-col gap-y-1 *:data-[slot=label]:font-medium">
-      {label && <Label>{label}</Label>}
+      {label && (
+        <Label>
+          {label}
+          {isRequired && <span className="text-danger ml-1">*</span>}
+        </Label>
+      )}
       <div
         className={cn([
-          'field-sizing-content min-h-40 w-full min-w-0 rounded-lg border border-input shadow-xs outline-hidden transition duration-200 overflow-hidden',
+          'field-sizing-content min-h-40 w-full min-w-0 rounded-lg border shadow-xs outline-hidden transition duration-200 overflow-hidden',
           'focus-within:border-ring/70 focus-within:ring-3 focus-within:ring-ring/20',
-          'disabled:opacity-50 disabled:forced-colors:border-[GrayText]',
-          'hover:border-current/20 invalid:hover:border-danger/70',
+          'hover:border-current/20',
+          isInvalid
+            ? 'border-danger invalid:hover:border-danger/70'
+            : 'border-input',
         ])}
       >
         <MenuBar editor={editor} />
         <div className="border-t border-input/50">
-          <EditorContent editor={editor} placeholder="Select a text" />
+          <EditorContent editor={editor} />
         </div>
       </div>
+      {errorMessage && <p className="text-sm text-danger">{errorMessage}</p>}
     </div>
   )
 }
@@ -81,7 +105,6 @@ function MenuBar({ editor }: { editor: Editor | null }) {
   const [formattingKeys, setFormattingKeys] = useState(new Set<Key>())
   const [listKeys, setListKeys] = useState(new Set<Key>())
 
-  // Update the selected keys when editor state changes
   useEffect(() => {
     if (!editor) return
 
@@ -104,7 +127,6 @@ function MenuBar({ editor }: { editor: Editor | null }) {
     editor.on('selectionUpdate', updateSelection)
     editor.on('transaction', updateSelection)
 
-    // Initial update
     updateSelection()
 
     return () => {
