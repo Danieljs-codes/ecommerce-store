@@ -1,11 +1,10 @@
 import {
   IconBuildingFill,
   IconChevronsY,
+  IconCircleHalf,
   IconCircleQuestionmarkFill,
   IconDashboardFill,
   IconDotsHorizontal,
-  IconHeadphonesFill,
-  IconLogout,
   IconMessageFill,
   IconNotesFill,
   IconSettingsFill,
@@ -20,7 +19,11 @@ import {
 } from '@tabler/icons-react'
 import { useLocation } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { useTheme } from 'next-themes'
 import { Logo } from '../logo'
+import { IconLogoutSquare } from '../icons/logout-square'
+import type { Doc } from '@convex/_generated/dataModel'
+import type { ComponentProps } from 'react'
 import { Avatar } from '@/components/ui/avatar'
 import { Link } from '@/components/ui/link'
 import { Menu } from '@/components/ui/menu'
@@ -41,10 +44,14 @@ import {
   SidebarSectionGroup,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { getNameInitials } from '@/lib/utils'
 
-export default function AppSidebar(
-  props: React.ComponentProps<typeof Sidebar>,
-) {
+type AppSidebarProps = ComponentProps<typeof Sidebar> & {
+  user: Doc<'users'>
+}
+
+export default function AppSidebar({ user, ...props }: AppSidebarProps) {
+  const { theme, setTheme } = useTheme()
   const pathname = useLocation({
     select: (s) => s.pathname,
   })
@@ -154,14 +161,13 @@ export default function AppSidebar(
       <SidebarFooter>
         <Menu>
           <Menu.Trigger className="group" aria-label="Profile">
-            <Avatar
-              isSquare
-              src="https://intentui.com/images/avatar/cobain.jpg"
-            />
+            <Avatar isSquare initials={getNameInitials(user.name)} />
             <div className="in-data-[sidebar-collapsible=dock]:hidden text-sm">
-              <SidebarLabel>Kurt Cobain</SidebarLabel>
-              <span className="-mt-0.5 block text-muted-fg">
-                kurt@cobain.com
+              <SidebarLabel className="capitalize">
+                {user.name.toLowerCase()}
+              </SidebarLabel>
+              <span className="-mt-0.5 block text-muted-fg lowercase w-[85%] truncate">
+                {user.email.toLowerCase()}
               </span>
             </div>
             <IconChevronsY data-slot="chevron" />
@@ -172,8 +178,12 @@ export default function AppSidebar(
           >
             <Menu.Section>
               <Menu.Header separator>
-                <span className="block">Kurt Cobain</span>
-                <span className="font-normal text-muted-fg">@cobain</span>
+                <span className="block capitalize">
+                  {user.name.toLowerCase()}
+                </span>
+                <span className="font-normal text-muted-fg lowercase">
+                  {user.email.toLowerCase()}
+                </span>
               </Menu.Header>
             </Menu.Section>
 
@@ -191,13 +201,24 @@ export default function AppSidebar(
             </Menu.Item>
             <Menu.Separator />
 
-            <Menu.Item href="#contact">
-              <IconHeadphonesFill />
-              Customer Support
+            <Menu.Item
+              className="capitalize"
+              onAction={() =>
+                setTheme(
+                  theme === 'light'
+                    ? 'dark'
+                    : theme === 'dark'
+                      ? 'system'
+                      : 'light',
+                )
+              }
+            >
+              <IconCircleHalf />
+              Switch Theme ({theme})
             </Menu.Item>
             <Menu.Separator />
             <Menu.Item href="#logout">
-              <IconLogout />
+              <IconLogoutSquare />
               Log out
             </Menu.Item>
           </Menu.Content>

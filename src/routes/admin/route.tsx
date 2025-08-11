@@ -34,6 +34,7 @@ export const Route = createFileRoute('/admin')({
 })
 
 function RouteComponent() {
+  const { user } = Route.useRouteContext()
   const match = useChildMatches()
 
   const loaderData = match[match.length - 1]?.loaderData
@@ -45,7 +46,7 @@ function RouteComponent() {
 
   return (
     <SidebarProvider shortcut="\">
-      <AppSidebar collapsible="dock" />
+      <AppSidebar user={user} collapsible="dock" />
       <SidebarInset>
         <AppSidebarNav title={title} />
         <Container className="p-4 lg:p-6 max-w- mx-auto py-0">

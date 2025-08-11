@@ -657,7 +657,7 @@ const SidebarTrigger = ({
 }: React.ComponentProps<typeof Button>) => {
   const { toggleSidebar, state } = useSidebar()
   return (
-    <Tooltip>
+    <Tooltip delay={500}>
       <Button
         aria-label={props['aria-label'] || 'Toggle Sidebar'}
         data-sidebar-trigger="true"

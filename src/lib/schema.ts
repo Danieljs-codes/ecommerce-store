@@ -51,7 +51,7 @@ export const productDetailsSchema = z.object({
   description: z.string().optional(),
   categoryId: z.string().optional(),
   tags: z.array(z.string()),
-  images: z.array(z.string()).min(1, 'At least one image is required'),
+  images: z.array(z.file()).min(1, 'At least one image is required'),
 })
 
 // Step 2: Variants & Publishing (combines variants + publish)
