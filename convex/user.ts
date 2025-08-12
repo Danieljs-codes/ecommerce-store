@@ -3,6 +3,7 @@ import { betterAuthComponent } from './auth'
 import type { RunQueryCtx } from '@convex-dev/better-auth'
 import type { DataModel, Id } from './_generated/dataModel'
 import type { Auth, GenericDatabaseReader } from 'convex/server'
+import { v } from 'convex/values'
 
 export const getUser = async (
   ctx: RunQueryCtx & { auth: Auth; db: GenericDatabaseReader<DataModel> },
@@ -21,7 +22,18 @@ export const getSignedInUser = query({
   args: {},
   handler: async (ctx) => {
     const user = await getUser(ctx)
-    
+
+    return user
+  },
+})
+
+export const getLoggedInUser = query({
+  args: {
+    userId: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId)
+
     return user
   },
 })

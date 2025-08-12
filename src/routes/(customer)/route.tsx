@@ -4,13 +4,21 @@ import { convexQuery } from '@convex-dev/react-query'
 import { AppNavbar } from '@/components/app-navbar'
 import { NavbarProvider } from '@/components/ui/navbar'
 import { Container } from '@/components/ui/container'
+import { Id } from '@convex/_generated/dataModel'
 
 export const Route = createFileRoute('/(customer)')({
   beforeLoad: async ({ context }) => {
+    if (!context.userId) {
+      return { user: null }
+    }
+
     const user = await context.queryClient.fetchQuery(
-      convexQuery(api.user.getSignedInUser, {}),
+      convexQuery(api.user.getLoggedInUser, {
+        userId: context.userId as Id<'users'>,
+      }),
     )
 
+    console.log('This shit ran')
     console.log(user)
 
     return { user }

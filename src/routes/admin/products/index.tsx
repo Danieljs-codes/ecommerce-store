@@ -156,41 +156,40 @@ function RouteComponent() {
               )}
             </Table.Body>
           </Table>
-
-          {data.totalProducts > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t">
-              <div className="text-sm text-muted-fg">
-                Showing {results.length} of {data.totalProducts} products
-                {isLoading && <span className="ml-2">(Loading...)</span>}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  intent="secondary"
-                  onPress={() => {
-                    // Go to previous page - this would need to be implemented
-                    // with a more complex pagination state management
-                  }}
-                  isDisabled={true} // Disabled for now as we need to track previous cursors
-                >
-                  <IconChevronLeft />
-                  Previous
-                </Button>
-                <Button
-                  size="sm"
-                  intent="secondary"
-                  onPress={() => {
-                    loadMore(10)
-                  }}
-                  isDisabled={isLoading || status !== 'CanLoadMore'}
-                >
-                  {isLoading ? 'Loading...' : 'Next'}
-                  <IconChevronRight />
-                </Button>
-              </div>
-            </div>
-          )}
         </MetricCard>
+        {data.totalProducts > 0 && (
+          <div className="flex items-center justify-between py-4">
+            <div className="text-sm text-muted-fg">
+              Showing {results.length} of {data.totalProducts} products
+              {isLoading && <span className="ml-2">(Loading...)</span>}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                intent="secondary"
+                onPress={() => {
+                  // Go to previous page - this would need to be implemented
+                  // with a more complex pagination state management
+                }}
+                isDisabled={true} // Disabled for now as we need to track previous cursors
+              >
+                <IconChevronLeft />
+                Previous
+              </Button>
+              <Button
+                size="sm"
+                intent="secondary"
+                onPress={() => {
+                  loadMore(10)
+                }}
+                isDisabled={isLoading || status !== 'CanLoadMore'}
+              >
+                {isLoading ? 'Loading...' : 'Next'}
+                <IconChevronRight />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
