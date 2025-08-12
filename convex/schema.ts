@@ -26,7 +26,7 @@ export default defineSchema({
   products: defineTable({
     name: v.string(), // "Cotton T-Shirt"
     slug: v.string(), // "cotton-t-shirt"
-    description: v.optional(v.string()),
+    description: v.string(),
     categoryId: v.optional(v.id('categories')),
     // Price in kobo (NGN)
     price: v.number(),
@@ -188,6 +188,7 @@ export default defineSchema({
       v.literal('deactivate_discount'),
     ),
     entityId: v.string(), // product/discount ID
+    scheduledFunctionId: v.id('_scheduled_functions'),
     scheduledFor: v.number(), // timestamp
     status: v.union(
       v.literal('pending'),

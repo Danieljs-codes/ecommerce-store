@@ -72,7 +72,7 @@ export const ProductBasicsStep = () => {
                 formatOptions={formatOptions}
                 {...field}
                 onChange={(value) =>
-                  field.onChange(Number.isNaN(value) ? 0 : value)
+                  field.onChange(typeof value !== 'number' ? 100 : value)
                 }
                 isInvalid={fieldState.invalid}
                 errorMessage={fieldState.error?.message}
@@ -352,10 +352,10 @@ export const ProductBasicsStep = () => {
               render={({ field, fieldState }) => (
                 <NumberField
                   label="Stock Count"
-                  minValue={0}
+                  minValue={1}
                   {...field}
                   onChange={(value) =>
-                    field.onChange(Number.isNaN(value) ? 0 : value)
+                    field.onChange(Number.isNaN(value) ? 1 : value)
                   }
                   isInvalid={fieldState.invalid}
                   errorMessage={fieldState.error?.message}

@@ -49,8 +49,13 @@ export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>
 // Step 1: Product Details (combines basics + images)
 export const productDetailsSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters'),
-  price: z.number().min(100, 'Price must be at least ₦1 (100 kobo)'),
-  description: z.string().optional(),
+  price: z.number().min(100, 'Price must be at least ₦100'),
+  description: z
+    .string()
+    .min(
+      10,
+      'Please provide a more detailed description (at least 10 characters)',
+    ),
   categoryId: z.string().min(1, 'Category is required'),
   tags: z.array(z.string()),
   images: z
@@ -67,13 +72,30 @@ export const productDetailsSchema = z.object({
 })
 
 // Step 2: Inventory & Publishing (simplified)
-export const productVariantsPublishSchema = z.object({
-  stockCount: z.number().min(0),
-  status: z.enum(['draft', 'active', 'scheduled']),
-  publishAt: z.number().optional(),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-})
+export const productVariantsPublishSchema = z
+  .object({
+    stockCount: z.number().min(1, 'Stock count must be at least 1'),
+    status: z.enum(['draft', 'active', 'scheduled']),
+    publishAt: z
+      .number()
+      .int()
+      .positive('Publish date must be a valid Unix epoch (in seconds)')
+      .optional(),
+    metaTitle: z.string().optional(),
+    metaDescription: z.string().optional(),
+  })
+  .superRefine(({ status, publishAt }, ctx) => {
+    if (
+      status === 'scheduled' &&
+      (publishAt === undefined || Number.isNaN(publishAt))
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Publish date is required when status is Scheduled',
+        path: ['publishAt'],
+      })
+    }
+  })
 
 // Combined schema
 export const productFormSchema = z.object({

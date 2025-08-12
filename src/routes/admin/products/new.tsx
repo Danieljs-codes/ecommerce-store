@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { IconCircleChevronLeftFilled } from '@tabler/icons-react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { convexQuery } from '@convex-dev/react-query'
+import { convexQuery, useConvexMutation } from '@convex-dev/react-query'
 import { api } from '@convex/_generated/api'
 import type { ProductFormData } from '@/lib/schema'
 import { Button, buttonStyles } from '@/components/ui/button'
@@ -10,6 +10,11 @@ import { Link } from '@/components/ui/link'
 import { productFormSchema } from '@/lib/schema'
 import { ProductBasicsStep } from '@/components/admin/product-basics-step'
 import ProductVariantsPublishStep from '@/components/admin/product-variants-publish-step'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { Id } from '@convex/_generated/dataModel'
+import { Loader } from '@/components/ui/loader'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/admin/products/new')({
   loader: async ({ context }) => {
@@ -24,6 +29,8 @@ export const Route = createFileRoute('/admin/products/new')({
 })
 
 function RouteComponent() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = Route.useNavigate()
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
@@ -40,6 +47,22 @@ function RouteComponent() {
     },
     mode: 'onChange',
   })
+
+  const { mutateAsync: generateUploadUrl, isPending: isUploading } =
+    useMutation({
+      mutationFn: useConvexMutation(api.upload.generateUploadUrl),
+    })
+  const { mutateAsync: createProduct, isPending: isCreatingProduct } =
+    useMutation({
+      mutationFn: useConvexMutation(api.products.createProduct),
+      onSuccess: () => {
+        toast.success('Product created successfully!')
+        navigate({
+          to: '/admin/products',
+        })
+      },
+      onError: (error) => toast.error(error.message),
+    })
 
   return (
     <div>
@@ -72,14 +95,53 @@ function RouteComponent() {
             </Button>
             <Button
               type="button"
+              isPending={isSubmitting}
               onPress={async () => {
                 const isValid = await form.trigger()
-                if (!isValid) return
-                const formData = form.getValues()
-                console.log('Submitting:', formData)
+                if (!isValid) {
+                  /* toast + return */
+                }
+
+                setIsSubmitting(true)
+                try {
+                  const values = form.getValues()
+
+                  // Upload images sequentially (avoids flicker and rate spikes)
+                  const storageIds: string[] = []
+                  for (const file of values.images) {
+                    const postUrl = await generateUploadUrl({})
+                    const res = await fetch(postUrl, {
+                      method: 'POST',
+                      headers: { 'Content-Type': file.type },
+                      body: file,
+                    })
+                    const json = (await res.json()) as { storageId: string }
+                    storageIds.push(json.storageId)
+                  }
+
+                  const priceKobo = Math.round(Number(values.price) * 100)
+
+                  await createProduct({
+                    name: values.name,
+                    price: priceKobo,
+                    description: values.description,
+                    categoryId:
+                      (values.categoryId as Id<'categories'>) || undefined,
+                    tags: values.tags || [],
+                    images: storageIds as Array<Id<'_storage'>>,
+                    stockCount: Number(values.stockCount) || 0,
+                    status: values.status,
+                    publishAtMs: values.publishAt,
+                    metaTitle: values.metaTitle || undefined,
+                    metaDescription: values.metaDescription || undefined,
+                  })
+                } finally {
+                  setIsSubmitting(false)
+                }
               }}
             >
-              Create Product
+              {isSubmitting && <Loader />}
+              {isSubmitting ? 'Creating product...' : 'Create product'}
             </Button>
           </div>
         </div>

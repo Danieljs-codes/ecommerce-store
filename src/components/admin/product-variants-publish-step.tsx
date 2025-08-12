@@ -1,6 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import { I18nProvider, type DateValue } from 'react-aria-components'
-import { getLocalTimeZone } from '@internationalized/date'
+import { I18nProvider } from 'react-aria-components'
+import { getLocalTimeZone, parseDate } from '@internationalized/date'
 import { MetricCard } from './metric-card'
 import { TextField } from '@/components/ui/text-field'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,18 +9,8 @@ import type { ProductFormData } from '@/lib/schema'
 import { DatePicker } from '../ui/date-picker'
 
 function ProductVariantsPublishStep() {
-  const { control, watch, setValue } = useFormContext<ProductFormData>()
-
+  const { control, watch } = useFormContext<ProductFormData>()
   const status = watch('status')
-
-  const handleScheduleChange = (value: DateValue | null) => {
-    if (!value) {
-      setValue('publishAt', undefined, { shouldValidate: true })
-      return
-    }
-    const date = value.toDate(getLocalTimeZone())
-    setValue('publishAt', date.getTime(), { shouldValidate: true })
-  }
 
   return (
     <>
@@ -67,12 +57,21 @@ function ProductVariantsPublishStep() {
             <Controller
               control={control}
               name="publishAt"
-              render={() => (
+              render={({ field }) => (
                 <I18nProvider locale="en-NG">
                   <DatePicker
                     label="Publish At"
                     description="Choose the date to publish"
-                    onChange={(v) => handleScheduleChange(v)}
+                    value={
+                      field.value
+                        ? parseDate(
+                            new Date(field.value).toISOString().slice(0, 10),
+                          )
+                        : null
+                    }
+                    onChange={(date) =>
+                      field.onChange(date?.toDate(getLocalTimeZone()).getTime())
+                    }
                   />
                 </I18nProvider>
               )}
