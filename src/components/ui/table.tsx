@@ -1,5 +1,5 @@
-import { IconChevronLgDown, IconDotGrid2X3 } from "@intentui/icons"
-import { createContext, use } from "react"
+import { IconChevronLgDown, IconDotGrid2X3 } from '@intentui/icons'
+import { createContext, use } from 'react'
 import type {
   CellProps,
   ColumnProps,
@@ -8,7 +8,7 @@ import type {
   RowProps,
   TableBodyProps,
   TableProps as TablePrimitiveProps,
-} from "react-aria-components"
+} from 'react-aria-components'
 import {
   Button,
   Cell,
@@ -22,12 +22,12 @@ import {
   TableHeader as TableHeaderPrimitive,
   Table as TablePrimitive,
   useTableOptions,
-} from "react-aria-components"
-import { twJoin, twMerge } from "tailwind-merge"
-import { composeTailwindRenderProps } from "@/lib/primitive"
-import { Checkbox } from "./checkbox"
+} from 'react-aria-components'
+import { twJoin, twMerge } from 'tailwind-merge'
+import { composeTailwindRenderProps } from '@/lib/primitive'
+import { Checkbox } from './checkbox'
 
-interface TableProps extends Omit<TablePrimitiveProps, "className"> {
+interface TableProps extends Omit<TablePrimitiveProps, 'className'> {
   allowResize?: boolean
   className?: string
   bleed?: boolean
@@ -49,18 +49,27 @@ const Root = (props: TableProps) => {
   )
 }
 
-const Table = ({ allowResize, className, bleed, ref, ...props }: TableProps) => {
+const Table = ({
+  allowResize,
+  className,
+  bleed,
+  ref,
+  ...props
+}: TableProps) => {
   return (
     <TableContext.Provider value={{ allowResize, bleed }}>
       <div className="flow-root">
         <div
           className={twMerge(
-            "-mx-(--gutter) relative overflow-x-auto whitespace-nowrap [--gutter-y:--spacing(2)] has-data-[slot=table-resizable-container]:overflow-auto",
+            '-mx-(--gutter) relative overflow-x-auto whitespace-nowrap [--gutter-y:--spacing(2)] has-data-[slot=table-resizable-container]:overflow-auto',
             className,
           )}
         >
           <div
-            className={twJoin("inline-block min-w-full align-middle", !bleed && "sm:px-(--gutter)")}
+            className={twJoin(
+              'inline-block min-w-full align-middle',
+              !bleed && 'sm:px-(--gutter)',
+            )}
           >
             {allowResize ? (
               <ResizableTableContainer data-slot="table-resizable-container">
@@ -81,7 +90,7 @@ const ColumnResizer = ({ className, ...props }: ColumnResizerProps) => (
     {...props}
     className={composeTailwindRenderProps(
       className,
-      "absolute top-0 right-0 bottom-0 grid w-px &[data-resizable-direction=left]:cursor-e-resize &[data-resizable-direction=right]:cursor-w-resize touch-none place-content-center px-1 data-[resizable-direction=both]:cursor-ew-resize [&[data-resizing]>div]:bg-primary",
+      'absolute top-0 right-0 bottom-0 grid w-px &[data-resizable-direction=left]:cursor-e-resize &[data-resizable-direction=right]:cursor-w-resize touch-none place-content-center px-1 data-[resizable-direction=both]:cursor-ew-resize [&[data-resizing]>div]:bg-primary',
     )}
   >
     <div className="h-full w-px bg-border py-(--gutter-y)" />
@@ -97,7 +106,11 @@ interface TableColumnProps extends ColumnProps {
   isResizable?: boolean
 }
 
-const TableColumn = ({ isResizable = false, className, ...props }: TableColumnProps) => {
+const TableColumn = ({
+  isResizable = false,
+  className,
+  ...props
+}: TableColumnProps) => {
   const { bleed } = useTableContext()
   return (
     <Column
@@ -106,27 +119,31 @@ const TableColumn = ({ isResizable = false, className, ...props }: TableColumnPr
       className={composeTailwindRenderProps(
         className,
         twJoin(
-          "text-left font-medium text-muted-fg",
-          "relative allows-sorting:cursor-default outline-hidden data-dragging:cursor-grabbing",
-          "px-4 py-(--gutter-y) first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))",
-          !bleed && "sm:last:pr-1 sm:first:pl-1",
-          isResizable && "overflow-hidden truncate",
+          'text-left font-medium text-muted-fg',
+          'relative allows-sorting:cursor-default outline-hidden data-dragging:cursor-grabbing',
+          'px-4 py-(--gutter-y) first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))',
+          !bleed && 'sm:last:pr-1 sm:first:pl-1',
+          isResizable && 'overflow-hidden truncate',
         ),
       )}
     >
       {(values) => (
         <div className="flex items-center gap-2 **:data-[slot=icon]:shrink-0">
-          {typeof props.children === "function" ? props.children(values) : props.children}
+          {typeof props.children === 'function'
+            ? props.children(values)
+            : props.children}
           {values.allowsSorting && (
             <span
               className={twMerge(
-                "grid size-[1.15rem] flex-none shrink-0 place-content-center rounded bg-secondary text-fg *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200",
-                values.isHovered ? "bg-secondary-fg/10" : "",
+                'grid size-[1.15rem] flex-none shrink-0 place-content-center rounded bg-secondary text-fg *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200',
+                values.isHovered ? 'bg-secondary-fg/10' : '',
                 className,
               )}
             >
               <IconChevronLgDown
-                className={values.sortDirection === "ascending" ? "rotate-180" : ""}
+                className={
+                  values.sortDirection === 'ascending' ? 'rotate-180' : ''
+                }
               />
             </span>
           )}
@@ -153,7 +170,7 @@ const TableHeader = <T extends object>({
   return (
     <TableHeaderPrimitive
       data-slot="table-header"
-      className={composeTailwindRenderProps(className, "border-b")}
+      className={composeTailwindRenderProps(className, 'border-b bg-secondary')}
       ref={ref}
       {...props}
     >
@@ -161,20 +178,20 @@ const TableHeader = <T extends object>({
         <Column
           data-slot="table-column"
           className={twMerge(
-            "w-0 max-w-8 px-4 first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))",
-            !bleed && "sm:last:pr-1 sm:first:pl-1",
+            'w-0 max-w-8 px-4 first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))',
+            !bleed && 'sm:last:pr-1 sm:first:pl-1',
           )}
         />
       )}
-      {selectionBehavior === "toggle" && (
+      {selectionBehavior === 'toggle' && (
         <Column
           data-slot="table-column"
           className={twMerge(
-            "w-0 max-w-8 px-4 first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))",
-            !bleed && "sm:last:pr-1 sm:first:pl-1",
+            'w-0 max-w-8 px-4 first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))',
+            !bleed && 'sm:last:pr-1 sm:first:pl-1',
           )}
         >
-          {selectionMode === "multiple" && <Checkbox slot="selection" />}
+          {selectionMode === 'multiple' && <Checkbox slot="selection" />}
         </Column>
       )}
       <Collection items={columns}>{children}</Collection>
@@ -204,17 +221,27 @@ const TableRow = <T extends object>({
       {...props}
       className={composeRenderProps(
         className,
-        (className, { isSelected, selectionMode, isFocusVisibleWithin, isDragging, isDisabled }) =>
+        (
+          className,
+          {
+            isSelected,
+            selectionMode,
+            isFocusVisibleWithin,
+            isDragging,
+            isDisabled,
+          },
+        ) =>
           twMerge(
-            "group relative cursor-default border-b text-muted-fg outline-transparent ring-primary last:border-b-0 ",
-            isDragging && "outline outline-blue-500",
-            isSelected && "bg-(--table-selected-bg) text-fg hover:bg-(--table-selected-bg)/50",
-            (props.href || props.onAction || selectionMode === "multiple") &&
-              "hover:bg-(--table-selected-bg) hover:text-fg",
-            (props.href || props.onAction || selectionMode === "multiple") &&
+            'group relative cursor-default border-b text-muted-fg outline-transparent ring-primary last:border-b-0 ',
+            isDragging && 'outline outline-blue-500',
+            isSelected &&
+              'bg-(--table-selected-bg) text-fg hover:bg-(--table-selected-bg)/50',
+            (props.href || props.onAction || selectionMode === 'multiple') &&
+              'hover:bg-(--table-selected-bg) hover:text-fg',
+            (props.href || props.onAction || selectionMode === 'multiple') &&
               isFocusVisibleWithin &&
-              "bg-(--table-selected-bg)/50 selected:bg-(--table-selected-bg)/50 text-fg",
-            isDisabled && "opacity-50",
+              'bg-(--table-selected-bg)/50 selected:bg-(--table-selected-bg)/50 text-fg',
+            isDisabled && 'opacity-50',
             className,
           ),
       )}
@@ -229,8 +256,10 @@ const TableRow = <T extends object>({
           </Button>
         </TableCell>
       )}
-      {selectionBehavior === "toggle" && (
-        <TableCell className={twJoin(!bleed && "max-w-4 sm:last:pr-1 sm:first:pl-1")}>
+      {selectionBehavior === 'toggle' && (
+        <TableCell
+          className={twJoin(!bleed && 'max-w-4 sm:last:pr-1 sm:first:pl-1')}
+        >
           <Checkbox slot="selection" />
         </TableCell>
       )}
@@ -248,9 +277,9 @@ const TableCell = ({ className, ...props }: CellProps) => {
       className={composeTailwindRenderProps(
         className,
         twJoin(
-          "group px-4 py-(--gutter-y) align-middle outline-hidden first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2)) group-has-data-focus-visible-within:text-fg",
-          !bleed && "sm:last:pr-1 sm:first:pl-1",
-          allowResize && "overflow-hidden truncate",
+          'group px-4 py-(--gutter-y) align-middle outline-hidden first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2)) group-has-data-focus-visible-within:text-fg',
+          !bleed && 'sm:last:pr-1 sm:first:pl-1',
+          allowResize && 'overflow-hidden truncate',
         ),
       )}
     />

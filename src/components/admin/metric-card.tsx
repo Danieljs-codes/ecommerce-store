@@ -33,10 +33,7 @@ export function MetricCard({
           </Card.Title>
           {description && (
             <Card.Description
-              className={cn(
-                'text-sm/5.5 text-muted-fg',
-                classNames?.description,
-              )}
+              className={cn('text-sm/5 text-muted-fg', classNames?.description)}
             >
               {description}
             </Card.Description>

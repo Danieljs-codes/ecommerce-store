@@ -1,5 +1,5 @@
 import { ConvexError, v } from 'convex/values'
-import { internalMutation, mutation } from './_generated/server'
+import { internalMutation, mutation, query } from './_generated/server'
 import { getUser } from './user'
 import type { DataModel, Id } from './_generated/dataModel'
 import { GenericDatabaseReader } from 'convex/server'
@@ -143,5 +143,84 @@ export const publishProduct = internalMutation({
         }),
       ),
     )
+  },
+})
+
+// Should return data shape like this ``` {
+// totalProduct: number,
+// activeProduct: number
+// scheduledProduct: number
+// inActiveProduct: number
+// product: Array<{}>
+// }
+
+export const getProducts = query({
+  args: {
+    filter: v.optional(
+      v.union(v.literal('active'), v.literal('draft'), v.literal('scheduled')),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const user = await getUser(ctx)
+    if (!user || user.role !== 'admin') throw new ConvexError('Unauthorized')
+
+    // Fetch all products for this seller to compute stats
+    const allProducts = await ctx.db
+      .query('products')
+      .withIndex('by_seller', (q) => q.eq('sellerId', user._id))
+      .collect()
+
+    const totalProducts = allProducts.length
+    const activeProducts = allProducts.filter(
+      (p) => p.status === 'active',
+    ).length
+    const scheduledProducts = allProducts.filter(
+      (p) => p.status === 'scheduled',
+    ).length
+    const inActiveProducts = allProducts.filter((p) => !p.isActive).length
+
+    // Apply optional filter for returned list
+    const filtered = args.filter
+      ? allProducts.filter((p) => p.status === args.filter)
+      : allProducts
+
+    // Sort by createdAt desc for a consistent UI
+    filtered.sort((a, b) => b.createdAt - a.createdAt)
+
+    const product = await Promise.all(
+      filtered.map(async (p) => {
+        let categoryName: string | null = null
+        if (p.categoryId) {
+          const cat = await ctx.db.get(p.categoryId as Id<'categories'>)
+          categoryName = cat?.name ?? null
+        }
+        return {
+          id: p._id,
+          name: p.name,
+          slug: p.slug,
+          description: p.description,
+          categoryName,
+          price: p.price,
+          stockCount: p.stockCount,
+          images: p.images,
+          tags: p.tags,
+          metaTitle: p.metaTitle,
+          metaDescription: p.metaDescription,
+          status: p.status,
+          publishAt: p.publishAt,
+          isActive: p.isActive,
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+        }
+      }),
+    )
+
+    return {
+      totalProducts,
+      activeProducts,
+      scheduledProducts,
+      inActiveProducts,
+      product,
+    }
   },
 })
