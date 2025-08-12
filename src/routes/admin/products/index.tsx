@@ -6,27 +6,35 @@ import PlusSignSquareIcon from '@/components/icons/plus-size-square-icon'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '@convex/_generated/api'
 import { z } from 'zod/v4'
-import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
 import { MetricCard } from '@/components/admin/metric-card'
 import { Table } from '@/components/ui/table'
 import { formatMoney } from '@/lib/utils'
 import { format } from 'date-fns'
 import { IconClipboardFill } from '@intentui/icons'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { IconChevronLeft, IconChevronRight } from '@intentui/icons'
+import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
+import { usePaginatedQuery } from 'convex/react'
 
 const searchParamSchema = z.object({
   filter: z
     .union([z.literal('active'), z.literal('draft'), z.literal('scheduled')])
     .optional()
     .catch(undefined),
+  page: z.number().optional().catch(1),
 })
 
 export const Route = createFileRoute('/admin/products/')({
   validateSearch: searchParamSchema,
-  loaderDeps: ({ search }) => ({ filter: search.filter }),
+  loaderDeps: ({ search }) => ({ filter: search.filter, page: search.page }),
   loader: ({ context, deps }) => {
+    const paginationOpts = {
+      numItems: 10,
+      cursor: null,
+    }
     context.queryClient.ensureQueryData(
-      convexQuery(api.products.getProducts, { filter: deps.filter }),
+      convexQuery(api.products.getProductStats, {}),
     )
     return {
       title: 'Products',
@@ -37,9 +45,18 @@ export const Route = createFileRoute('/admin/products/')({
 
 function RouteComponent() {
   const search = Route.useSearch()
-  const { data, isSuspending } = useSuspenseQueryDeferred(
-    convexQuery(api.products.getProducts, { filter: search.filter }),
+  const navigate = Route.useNavigate()
+  const { data } = useSuspenseQueryDeferred(
+    convexQuery(api.products.getProductStats, {}),
   )
+  const { results, status, loadMore, isLoading } = usePaginatedQuery(
+    api.products.getProductsPage,
+    {},
+    {
+      initialNumItems: 10,
+    },
+  )
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -90,18 +107,17 @@ function RouteComponent() {
               <Table.Column>Price</Table.Column>
               <Table.Column>Stock</Table.Column>
               <Table.Column>Status</Table.Column>
-              <Table.Column>Category</Table.Column>
               <Table.Column>Created at</Table.Column>
             </Table.Header>
-            <Table.Body items={data.product}>
+            <Table.Body items={results}>
               {(item) => (
-                <Table.Row id={String(item.id)}>
+                <Table.Row id={String(item._id)}>
                   <Table.Cell className="text-muted-fg">
                     <div className="flex items-center gap-1">
-                      {String(item.id).slice(-4)}...
+                      {String(item._id).slice(-4)}...
                       <button
                         onClick={() => {
-                          navigator.clipboard.writeText(String(item.id))
+                          navigator.clipboard.writeText(String(item._id))
                         }}
                         title="Copy Product ID"
                         className="p-1 rounded hover:bg-accent transition-colors"
@@ -133,9 +149,6 @@ function RouteComponent() {
                       {item.status}
                     </Badge>
                   </Table.Cell>
-                  <Table.Cell className="whitespace-nowrap">
-                    {item.categoryName ?? '—'}
-                  </Table.Cell>
                   <Table.Cell>
                     {format(new Date(item.createdAt), 'do MMM, yyyy')}
                   </Table.Cell>
@@ -143,10 +156,42 @@ function RouteComponent() {
               )}
             </Table.Body>
           </Table>
+
+          {data.totalProducts > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t">
+              <div className="text-sm text-muted-fg">
+                Showing {results.length} of {data.totalProducts} products
+                {isLoading && <span className="ml-2">(Loading...)</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  intent="secondary"
+                  onPress={() => {
+                    // Go to previous page - this would need to be implemented
+                    // with a more complex pagination state management
+                  }}
+                  isDisabled={true} // Disabled for now as we need to track previous cursors
+                >
+                  <IconChevronLeft />
+                  Previous
+                </Button>
+                <Button
+                  size="sm"
+                  intent="secondary"
+                  onPress={() => {
+                    loadMore(10)
+                  }}
+                  isDisabled={isLoading || status !== 'CanLoadMore'}
+                >
+                  {isLoading ? 'Loading...' : 'Next'}
+                  <IconChevronRight />
+                </Button>
+              </div>
+            </div>
+          )}
         </MetricCard>
       </div>
     </div>
   )
 }
-
-// Demo books removed; table uses real data from getProducts

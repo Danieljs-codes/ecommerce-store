@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
 import type * as email from "../email.js";
 import type * as emails_forgotPassword from "../emails/forgotPassword.js";
+import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
 import type * as overview from "../overview.js";
 import type * as products from "../products.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   categories: typeof categories;
   email: typeof email;
   "emails/forgotPassword": typeof emails_forgotPassword;
+  helpers: typeof helpers;
   http: typeof http;
   overview: typeof overview;
   products: typeof products;

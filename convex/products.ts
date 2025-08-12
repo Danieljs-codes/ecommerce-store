@@ -2,8 +2,9 @@ import { ConvexError, v } from 'convex/values'
 import { internalMutation, mutation, query } from './_generated/server'
 import { getUser } from './user'
 import type { DataModel, Id } from './_generated/dataModel'
-import { GenericDatabaseReader } from 'convex/server'
+import { GenericDatabaseReader, paginationOptsValidator } from 'convex/server'
 import { internal } from './_generated/api'
+import { fetchProductStats } from './helpers'
 
 function slugify(input: string): string {
   return input
@@ -154,73 +155,34 @@ export const publishProduct = internalMutation({
 // product: Array<{}>
 // }
 
-export const getProducts = query({
+export const getProductsPage = query({
   args: {
     filter: v.optional(
       v.union(v.literal('active'), v.literal('draft'), v.literal('scheduled')),
     ),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const user = await getUser(ctx)
-    if (!user || user.role !== 'admin') throw new ConvexError('Unauthorized')
+    if (!user || user.role !== 'admin') throw new Error('Unauthorized')
 
-    // Fetch all products for this seller to compute stats
-    const allProducts = await ctx.db
+    let q = ctx.db
       .query('products')
       .withIndex('by_seller', (q) => q.eq('sellerId', user._id))
-      .collect()
-
-    const totalProducts = allProducts.length
-    const activeProducts = allProducts.filter(
-      (p) => p.status === 'active',
-    ).length
-    const scheduledProducts = allProducts.filter(
-      (p) => p.status === 'scheduled',
-    ).length
-    const inActiveProducts = allProducts.filter((p) => !p.isActive).length
-
-    // Apply optional filter for returned list
-    const filtered = args.filter
-      ? allProducts.filter((p) => p.status === args.filter)
-      : allProducts
-
-    // Sort by createdAt desc for a consistent UI
-    filtered.sort((a, b) => b.createdAt - a.createdAt)
-
-    const product = await Promise.all(
-      filtered.map(async (p) => {
-        let categoryName: string | null = null
-        if (p.categoryId) {
-          const cat = await ctx.db.get(p.categoryId as Id<'categories'>)
-          categoryName = cat?.name ?? null
-        }
-        return {
-          id: p._id,
-          name: p.name,
-          slug: p.slug,
-          description: p.description,
-          categoryName,
-          price: p.price,
-          stockCount: p.stockCount,
-          images: p.images,
-          tags: p.tags,
-          metaTitle: p.metaTitle,
-          metaDescription: p.metaDescription,
-          status: p.status,
-          publishAt: p.publishAt,
-          isActive: p.isActive,
-          createdAt: p.createdAt,
-          updatedAt: p.updatedAt,
-        }
-      }),
-    )
-
-    return {
-      totalProducts,
-      activeProducts,
-      scheduledProducts,
-      inActiveProducts,
-      product,
+    if (args.filter) {
+      q = q.filter((q) => q.eq(q.field('status'), args.filter))
     }
+
+    return await q.paginate(args.paginationOpts)
+  },
+})
+
+export const getProductStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getUser(ctx)
+    if (!user || user.role !== 'admin') throw new Error('Unauthorized')
+
+    return await fetchProductStats({ ...ctx, userId: user._id })
   },
 })
