@@ -10,10 +10,9 @@ import {
 } from '@intentui/icons'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '@convex/_generated/api'
-import { useLocation, useNavigate } from '@tanstack/react-router'
+import { useLocation, useNavigate, useRouter } from '@tanstack/react-router'
 import { Avatar } from './ui/avatar'
 import { Logo } from './logo'
 import { ThemeToggle } from './theme-toggle'
@@ -39,6 +38,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { cn, getNameInitials } from '@/lib/utils'
 import { authClient } from '@/lib/auth-client'
+import { toast } from 'sonner'
 
 const categories = [
   { id: 1, label: 'Electronics', url: '#' },
@@ -77,22 +77,18 @@ type AppNavbarProps = NavbarProps & {
 }
 
 function UserMenu({ user }: { user: Doc<'users'> }) {
+  const router = useRouter()
   const navigate = useNavigate({ from: '/' })
   const queryClient = useQueryClient()
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          toast.success('Signed out successfully')
           queryClient.removeQueries({
             queryKey: convexQuery(api.user.getSignedInUser, {}).queryKey,
           })
-          navigate({
-            to: '/sign-in',
-          })
-        },
-        onError: ({ error }) => {
-          toast.error(error.message)
+
+          router.invalidate()
         },
       },
     })
@@ -188,7 +184,16 @@ function UserMenu({ user }: { user: Doc<'users'> }) {
             <Menu.Label>Wishlist</Menu.Label>
           </Menu.Link>
           <Menu.Separator />
-          <Menu.Item onPress={handleSignOut} isDanger>
+          <Menu.Item
+            onPress={() =>
+              toast.promise(handleSignOut, {
+                loading: 'Signing you out...',
+                success: 'You have been signed out.',
+                error: 'Failed to sign out. Please try again.',
+              })
+            }
+            isDanger
+          >
             <IconLogout />
             Log out
           </Menu.Item>
