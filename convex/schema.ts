@@ -28,15 +28,11 @@ export default defineSchema({
     slug: v.string(), // "cotton-t-shirt"
     description: v.optional(v.string()),
     categoryId: v.optional(v.id('categories')),
+    // Price in kobo (NGN)
+    price: v.number(),
 
-    // What makes variants different? e.g., ["color", "size"]
-    variantOptions: v.array(v.string()),
-
-    // Base price in kobo (NGN) - variants can override this
-    basePrice: v.number(),
-
-    // Which variant to show by default
-    defaultVariant: v.optional(v.id('variants')),
+    // Simple inventory when not using variants
+    stockCount: v.number(),
 
     // Media
     images: v.array(v.id('_storage')),
@@ -68,36 +64,7 @@ export default defineSchema({
     .index('by_scheduled', ['status', 'publishAt']) // for scheduled publishing
     .index('by_active_category', ['isActive', 'categoryId']),
 
-  //  !VARIANTS TABLE !
-  variants: defineTable({
-    productId: v.id('products'),
-
-    // Simple code like "black-large" or "blue-128gb"
-    variantCode: v.string(),
-
-    // What this variant is: { color: "black", size: "large" }
-    options: v.record(v.string(), v.string()),
-
-    // Pricing
-    price: v.optional(v.number()), // kobo, if empty uses product.basePrice
-    compareAtPrice: v.optional(v.number()), // "was" price for discounts
-
-    // Inventory
-    stockCount: v.number(),
-
-    // Variant-specific media
-    images: v.array(v.id('_storage')),
-
-    // SKU code for admin
-    sku: v.optional(v.string()),
-
-    isActive: v.boolean(),
-    createdAt: v.number(),
-  })
-    .index('by_product', ['productId'])
-    .index('by_product_code', ['productId', 'variantCode'])
-    .index('by_product_active', ['productId', 'isActive'])
-    .index('by_sku', ['sku']),
+  // Variants removed for simplified product model
 
   // ===== STORE-WIDE DISCOUNTS =====
   discounts: defineTable({
@@ -141,14 +108,14 @@ export default defineSchema({
 
   cart_items: defineTable({
     cartId: v.id('carts'),
-    variantId: v.id('variants'),
+    productId: v.id('products'),
     quantity: v.number(),
     // Snapshot prices when added
     priceAtAdd: v.number(), // kobo
     createdAt: v.number(),
   })
     .index('by_cart', ['cartId'])
-    .index('by_cart_variant', ['cartId', 'variantId']),
+    .index('by_cart_product', ['cartId', 'productId']),
 
   orders: defineTable({
     userId: v.id('users'),
@@ -203,13 +170,10 @@ export default defineSchema({
   order_items: defineTable({
     orderId: v.id('orders'),
     productId: v.id('products'),
-    variantId: v.id('variants'),
     quantity: v.number(),
 
     // Snapshot data at time of order
     productName: v.string(),
-    variantCode: v.string(),
-    variantOptions: v.record(v.string(), v.string()),
     pricePerItem: v.number(), // kobo
     totalPrice: v.number(), // kobo (pricePerItem * quantity)
   })

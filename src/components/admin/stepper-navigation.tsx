@@ -26,21 +26,11 @@ export function StepperNavigation({
     switch (stepNumber) {
       case 1:
         // Step 1: Product Details (basics + images)
-        return [
-          'name',
-          'basePrice',
-          'description',
-          'categoryId',
-          'tags',
-          'images',
-        ]
+        return ['name', 'price', 'description', 'categoryId', 'tags', 'images']
       case 2:
-        // Step 2: Variants & Publishing
+        // Step 2: Inventory & Publishing
         return [
-          'hasVariants',
           'stockCount',
-          'variantOptions',
-          'variants',
           'status',
           'metaTitle',
           'metaDescription',
@@ -61,6 +51,8 @@ export function StepperNavigation({
 
   const handleNext = async () => {
     const isValid = await validateCurrentStep()
+
+    console.log('isValid', isValid)
 
     if (isValid) {
       if (isLast) {

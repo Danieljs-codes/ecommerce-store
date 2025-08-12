@@ -71,7 +71,8 @@ export const SalesMetrics = () => {
         title="Recent Sales"
         description="Your store's sales revenue for the last 30 days."
         classNames={{
-          content: 'lg:col-span-2 h-full p-0 overflow-hidden',
+          card: 'lg:col-span-2',
+          content: 'h-full p-0 overflow-hidden',
         }}
         action={
           <div className="flex items-center gap-x-2">

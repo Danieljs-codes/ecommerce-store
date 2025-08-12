@@ -2,23 +2,16 @@ import { createFileRoute } from '@tanstack/react-router'
 import { IconCircleChevronLeftFilled } from '@tabler/icons-react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod/v4'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '@convex/_generated/api'
 import type { ProductFormData } from '@/lib/schema'
-import { buttonStyles } from '@/components/ui/button'
+import { Button, buttonStyles } from '@/components/ui/button'
 import { Link } from '@/components/ui/link'
 import { productFormSchema } from '@/lib/schema'
-import { StepperHeader } from '@/components/admin/stepper-header'
 import { ProductBasicsStep } from '@/components/admin/product-basics-step'
-import { StepperNavigation } from '@/components/admin/stepper-navigation'
-
-const searchParamSchema = z.object({
-  step: z.union([z.literal(1), z.literal(2)]).default(1),
-})
+import ProductVariantsPublishStep from '@/components/admin/product-variants-publish-step'
 
 export const Route = createFileRoute('/admin/products/new')({
-  validateSearch: searchParamSchema,
   loader: async ({ context }) => {
     context.queryClient.ensureQueryData(
       convexQuery(api.categories.getExistingCategories, {}),
@@ -30,49 +23,23 @@ export const Route = createFileRoute('/admin/products/new')({
   component: RouteComponent,
 })
 
-const steps: Array<{ id: 1 | 2; title: string; description: string }> = [
-  {
-    id: 1,
-    title: 'Product Details',
-    description: 'Basic information and images',
-  },
-  {
-    id: 2,
-    title: 'Variants & Publishing',
-    description: 'Inventory, variants, and publish settings',
-  },
-]
-
 function RouteComponent() {
-  const navigate = Route.useNavigate()
-  const currentStep = Route.useSearch({
-    select: (s) => s.step,
-  })
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: '',
-      basePrice: 0,
+      price: 0,
       description: '',
       tags: [],
       images: [],
-      hasVariants: false,
       status: 'draft' as const,
       stockCount: 0,
       categoryId: '',
+      metaTitle: '',
+      metaDescription: '',
     },
     mode: 'onChange',
   })
-
-  const goToStep = (stepNumber: 1 | 2) => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        step: stepNumber,
-      }),
-      replace: true,
-    })
-  }
 
   return (
     <div>
@@ -87,27 +54,34 @@ function RouteComponent() {
       </div>
       <FormProvider {...form}>
         <div className="space-y-8">
-          {/* Step Header */}
-          <StepperHeader
-            steps={steps}
-            currentStep={currentStep}
-            onStepClick={goToStep}
-          />
-
-          {/* Step Content */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {currentStep === 1 && <ProductBasicsStep />}
-            {/* {currentStep === 2 && <ProductVariantsPublishStep />} */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ProductBasicsStep />
+            <ProductVariantsPublishStep />
           </div>
 
-          {/* Navigation  */}
-          <StepperNavigation
-            currentStep={currentStep}
-            totalSteps={steps.length}
-            onNext={() => goToStep((currentStep + 1) as 1 | 2)}
-            onPrev={() => goToStep((currentStep - 1) as 1 | 2)}
-            form={form}
-          />
+          <div className="flex items-center justify-end pt-6 border-t gap-2">
+            <Button
+              type="button"
+              intent="secondary"
+              onPress={() => {
+                const formData = form.getValues()
+                console.log('Saving draft:', formData)
+              }}
+            >
+              Save Draft
+            </Button>
+            <Button
+              type="button"
+              onPress={async () => {
+                const isValid = await form.trigger()
+                if (!isValid) return
+                const formData = form.getValues()
+                console.log('Submitting:', formData)
+              }}
+            >
+              Create Product
+            </Button>
+          </div>
         </div>
       </FormProvider>
     </div>

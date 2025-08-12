@@ -49,7 +49,7 @@ export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>
 // Step 1: Product Details (combines basics + images)
 export const productDetailsSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters'),
-  basePrice: z.number().min(100, 'Price must be at least ₦1 (100 kobo)'),
+  price: z.number().min(100, 'Price must be at least ₦1 (100 kobo)'),
   description: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
   tags: z.array(z.string()),
@@ -66,22 +66,9 @@ export const productDetailsSchema = z.object({
     .min(1, 'At least one image is required'),
 })
 
-// Step 2: Variants & Publishing (combines variants + publish)
+// Step 2: Inventory & Publishing (simplified)
 export const productVariantsPublishSchema = z.object({
-  hasVariants: z.boolean(),
-  variantOptions: z.array(z.string()).optional(),
-  stockCount: z.number().min(0).optional(), // For simple products
-  variants: z
-    .array(
-      z.object({
-        variantCode: z.string(),
-        options: z.record(z.string(), z.string()),
-        stockCount: z.number().min(0),
-        price: z.number().optional(),
-        sku: z.string().optional(),
-      }),
-    )
-    .optional(),
+  stockCount: z.number().min(0),
   status: z.enum(['draft', 'active', 'scheduled']),
   publishAt: z.number().optional(),
   metaTitle: z.string().optional(),

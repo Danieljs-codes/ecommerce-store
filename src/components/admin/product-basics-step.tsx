@@ -14,7 +14,7 @@ import { MetricCard } from './metric-card'
 import { RichTextEditor } from './rich-text-editor'
 import type { ProductFormData } from '@/lib/schema'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
-import { useEffect, useId } from 'react'
+import { useId } from 'react'
 import { Badge } from '../ui/badge'
 
 const formatOptions = {
@@ -41,15 +41,14 @@ export const ProductBasicsStep = () => {
 
   const uploadedImages = watch('images')
 
-  useEffect(() => {
-    console.log(errors)
-  }, [errors])
-
   return (
     <>
       <MetricCard
         title="Basic Information"
         description="Enter the basic information for the product."
+        classNames={{
+          content: 'h-full',
+        }}
       >
         <div className="flex flex-col gap-4">
           <Controller
@@ -66,10 +65,10 @@ export const ProductBasicsStep = () => {
           />
           <Controller
             control={control}
-            name="basePrice"
+            name="price"
             render={({ field, fieldState }) => (
               <NumberField
-                label="Base Price"
+                label="Price"
                 formatOptions={formatOptions}
                 {...field}
                 onChange={(value) =>
@@ -335,6 +334,32 @@ export const ProductBasicsStep = () => {
                     ))}
                   </div>
                 </>
+              )}
+            />
+          </div>
+        </MetricCard>
+        <MetricCard
+          title="Inventory"
+          description="Set available stock for this product."
+          classNames={{
+            card: 'mt-4',
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            <Controller
+              control={control}
+              name="stockCount"
+              render={({ field, fieldState }) => (
+                <NumberField
+                  label="Stock Count"
+                  minValue={0}
+                  {...field}
+                  onChange={(value) =>
+                    field.onChange(Number.isNaN(value) ? 0 : value)
+                  }
+                  isInvalid={fieldState.invalid}
+                  errorMessage={fieldState.error?.message}
+                />
               )}
             />
           </div>
