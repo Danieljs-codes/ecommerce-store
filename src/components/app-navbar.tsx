@@ -87,7 +87,6 @@ function UserMenu({ user }: { user: Doc<'users'> }) {
           queryClient.removeQueries({
             queryKey: convexQuery(api.user.getSignedInUser, {}).queryKey,
           })
-
           router.invalidate()
         },
       },

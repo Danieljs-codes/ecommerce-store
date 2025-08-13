@@ -73,6 +73,23 @@ export const setFlashCookie = createIsomorphicFn()
     },
   )
 
+export const getSidebarState = createIsomorphicFn()
+  .server(() => {
+    
+    const sidebarState = getCookie('sidebar_state')
+    
+    if (!sidebarState) return false
+    return JSON.parse(sidebarState)
+  })
+  .client(() => {
+    const sidebarState = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('sidebar_state='))
+      ?.split('=')[1]
+    if (!sidebarState) return false
+    return JSON.parse(decodeURIComponent(sidebarState)) 
+  })
+
 export const getNameInitials = (name: string) => {
   const names = name.trim().split(/\s+/).filter(Boolean)
 

@@ -6,7 +6,7 @@ import {
   redirect,
   useChildMatches,
 } from '@tanstack/react-router'
-import { setFlashCookie } from '@/lib/utils'
+import { getSidebarState, setFlashCookie } from '@/lib/utils'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/admin/app-sidebar'
 import AppSidebarNav from '@/components/admin/app-sidebar-nav'
@@ -30,10 +30,18 @@ export const Route = createFileRoute('/admin')({
 
     return { user }
   },
+  loader: async () => {
+    const sidebarState = getSidebarState()
+
+    return {
+      sidebarState,
+    }
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const data = Route.useLoaderData()
   const { user } = Route.useRouteContext()
   const match = useChildMatches()
 
@@ -45,7 +53,7 @@ function RouteComponent() {
       : 'Dashboard'
 
   return (
-    <SidebarProvider shortcut="\">
+    <SidebarProvider shortcut="\" defaultOpen={data.sidebarState}>
       <AppSidebar user={user} collapsible="dock" />
       <SidebarInset>
         <AppSidebarNav title={title} user={user} />

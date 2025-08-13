@@ -5,6 +5,18 @@ import type { DataModel, Id } from './_generated/dataModel'
 import { GenericDatabaseReader, paginationOptsValidator } from 'convex/server'
 import { internal } from './_generated/api'
 import { fetchProductStats } from './helpers'
+import { TableAggregate } from '@convex-dev/aggregate'
+import { components } from './_generated/api'
+
+const productAggregate = new TableAggregate<{
+  Namespace: undefined
+  Key: number
+  DataModel: DataModel
+  tableName: 'products'
+}>(components.products, {
+  namespace: () => undefined,
+  sortKey: doc => doc._creationTime
+})
 
 function slugify(input: string): string {
   return input
@@ -146,14 +158,6 @@ export const publishProduct = internalMutation({
     )
   },
 })
-
-// Should return data shape like this ``` {
-// totalProduct: number,
-// activeProduct: number
-// scheduledProduct: number
-// inActiveProduct: number
-// product: Array<{}>
-// }
 
 export const getProductsPage = query({
   args: {

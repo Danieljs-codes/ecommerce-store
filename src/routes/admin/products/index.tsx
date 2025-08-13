@@ -51,10 +51,8 @@ function RouteComponent() {
   )
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
     api.products.getProductsPage,
-    {},
-    {
-      initialNumItems: 10,
-    },
+    { filter: search.filter },
+    { initialNumItems: 10 },
   )
 
   return (

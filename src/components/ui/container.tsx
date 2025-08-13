@@ -13,7 +13,7 @@ const Container = ({
 }: ContainerProps) => (
   <div
     className={twMerge(
-      'mx-auto w-full max-w-7xl 2xl:max-w-(--breakpoint-xl)',
+      'mx-auto w-full container',
       constrained ? 'sm:px-6' : 'px-4 sm:px-6',
       className,
     )}
