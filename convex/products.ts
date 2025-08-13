@@ -2,20 +2,20 @@ import { ConvexError, v } from 'convex/values'
 import { internalMutation, mutation, query } from './_generated/server'
 import { getUser } from './user'
 import type { DataModel, Id } from './_generated/dataModel'
-import { GenericDatabaseReader, paginationOptsValidator } from 'convex/server'
+import { GenericDatabaseReader } from 'convex/server'
 import { internal } from './_generated/api'
 import { fetchProductStats } from './helpers'
 import { TableAggregate } from '@convex-dev/aggregate'
 import { components } from './_generated/api'
 
-const productAggregate = new TableAggregate<{
+const productsAggregate = new TableAggregate<{
   Namespace: undefined
   Key: number
   DataModel: DataModel
-  tableName: 'products'
+  TableName: 'products'
 }>(components.products, {
   namespace: () => undefined,
-  sortKey: doc => doc._creationTime
+  sortKey: (doc) => doc._creationTime,
 })
 
 function slugify(input: string): string {
@@ -102,6 +102,10 @@ export const createProduct = mutation({
       isActive: args.status === 'active',
     })
 
+    // Update the aggregate
+    const doc = await ctx.db.get(productId);
+    await productsAggregate.insert(ctx, doc!);
+
     // If scheduled, enqueue publish job and record scheduled function id
     if (args.status === 'scheduled' && publishAtMs) {
       const scheduledFnId = await ctx.scheduler.runAt(
@@ -164,20 +168,44 @@ export const getProductsPage = query({
     filter: v.optional(
       v.union(v.literal('active'), v.literal('draft'), v.literal('scheduled')),
     ),
-    paginationOpts: paginationOptsValidator,
+    offset: v.number(),
+    numItems: v.number(),
   },
   handler: async (ctx, args) => {
     const user = await getUser(ctx)
     if (!user || user.role !== 'admin') throw new Error('Unauthorized')
 
+    const hasProducts = await ctx.db.query('products').first()
+    if (!hasProducts) {
+      return {
+        page: [],
+        hasNextPage: false,
+      }
+    }
+
+    const { key } = await productsAggregate.at(ctx, args.offset, {
+      namespace: undefined,
+    })
+
     let q = ctx.db
       .query('products')
-      .withIndex('by_seller', (q) => q.eq('sellerId', user._id))
+      .withIndex('by_seller', (q) =>
+        q.eq('sellerId', user._id).gte('_creationTime', key),
+      )
     if (args.filter) {
       q = q.filter((q) => q.eq(q.field('status'), args.filter))
     }
 
-    return await q.paginate(args.paginationOpts)
+    // Fetch one extra item to check if there is a next page
+    const results = await q.take(args.numItems + 1)
+
+    const hasNextPage = results.length > args.numItems
+
+    // Return only the requested number of items
+    return {
+      page: results.slice(0, args.numItems),
+      hasNextPage,
+    }
   },
 })
 

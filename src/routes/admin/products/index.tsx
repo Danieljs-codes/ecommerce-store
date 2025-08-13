@@ -15,26 +15,33 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { IconChevronLeft, IconChevronRight } from '@intentui/icons'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
-import { usePaginatedQuery } from 'convex/react'
 
 const searchParamSchema = z.object({
   filter: z
     .union([z.literal('active'), z.literal('draft'), z.literal('scheduled')])
     .optional()
     .catch(undefined),
-  page: z.number().optional().catch(1),
+  page: z.number().int().positive().catch(1),
+  numItems: z.number().int().positive().catch(10),
 })
 
 export const Route = createFileRoute('/admin/products/')({
   validateSearch: searchParamSchema,
-  loaderDeps: ({ search }) => ({ filter: search.filter, page: search.page }),
+  loaderDeps: ({ search }) => ({
+    filter: search.filter,
+    page: search.page,
+    numItems: search.numItems,
+  }),
   loader: ({ context, deps }) => {
-    const paginationOpts = {
-      numItems: 10,
-      cursor: null,
-    }
     context.queryClient.ensureQueryData(
       convexQuery(api.products.getProductStats, {}),
+    )
+    context.queryClient.ensureQueryData(
+      convexQuery(api.products.getProductsPage, {
+        filter: deps.filter,
+        numItems: deps.numItems,
+        offset: (deps.page - 1) * deps.numItems,
+      }),
     )
     return {
       title: 'Products',
@@ -49,10 +56,12 @@ function RouteComponent() {
   const { data } = useSuspenseQueryDeferred(
     convexQuery(api.products.getProductStats, {}),
   )
-  const { results, status, loadMore, isLoading } = usePaginatedQuery(
-    api.products.getProductsPage,
-    { filter: search.filter },
-    { initialNumItems: 10 },
+  const { data: productsData } = useSuspenseQueryDeferred(
+    convexQuery(api.products.getProductsPage, {
+      filter: search.filter,
+      numItems: search.numItems,
+      offset: (search.page - 1) * search.numItems,
+    }),
   )
 
   return (
@@ -107,7 +116,7 @@ function RouteComponent() {
               <Table.Column>Status</Table.Column>
               <Table.Column>Created at</Table.Column>
             </Table.Header>
-            <Table.Body items={results}>
+            <Table.Body items={productsData.page}>
               {(item) => (
                 <Table.Row id={String(item._id)}>
                   <Table.Cell className="text-muted-fg">
@@ -158,18 +167,15 @@ function RouteComponent() {
         {data.totalProducts > 0 && (
           <div className="flex items-center justify-between py-4">
             <div className="text-sm text-muted-fg">
-              Showing {results.length} of {data.totalProducts} products
-              {isLoading && <span className="ml-2">(Loading...)</span>}
+              Showing {productsData.page.length} of {data.totalProducts}{' '}
+              products
             </div>
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
                 intent="secondary"
-                onPress={() => {
-                  // Go to previous page - this would need to be implemented
-                  // with a more complex pagination state management
-                }}
-                isDisabled={true} // Disabled for now as we need to track previous cursors
+                onPress={() => {}}
+                isDisabled={search.page <= 1}
               >
                 <IconChevronLeft />
                 Previous
@@ -177,12 +183,10 @@ function RouteComponent() {
               <Button
                 size="sm"
                 intent="secondary"
-                onPress={() => {
-                  loadMore(10)
-                }}
-                isDisabled={isLoading || status !== 'CanLoadMore'}
+                onPress={() => {}}
+                isDisabled={!productsData.hasNextPage}
               >
-                {isLoading ? 'Loading...' : 'Next'}
+                Next
                 <IconChevronRight />
               </Button>
             </div>
