@@ -146,7 +146,7 @@ function InnerComponent({ children }: { children: React.ReactNode }) {
     if (router.status === 'idle') {
       nProgress.done()
     }
-  }, [])
+  }, [router.pathname, router.status])
 
   return <>{children}</>
 }

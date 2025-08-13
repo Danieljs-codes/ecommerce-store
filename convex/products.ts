@@ -99,7 +99,7 @@ export const createProduct = mutation({
       sellerId: user._id,
       createdAt,
       updatedAt: createdAt,
-      isActive: args.status === 'active',
+      
     })
 
     // Update the aggregate

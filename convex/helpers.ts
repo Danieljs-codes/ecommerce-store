@@ -20,6 +20,6 @@ export async function fetchProductStats(
     activeProducts: allProducts.filter((p) => p.status === 'active').length,
     scheduledProducts: allProducts.filter((p) => p.status === 'scheduled')
       .length,
-    inActiveProducts: allProducts.filter((p) => !p.isActive).length,
+    inActiveProducts: allProducts.filter((p) => p.status !== 'active' && p.status !== 'scheduled').length,
   }
 }

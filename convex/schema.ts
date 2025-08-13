@@ -55,14 +55,14 @@ export default defineSchema({
     sellerId: v.id('users'),
     createdAt: v.number(),
     updatedAt: v.number(),
-    isActive: v.boolean(),
+ 
   })
     .index('by_slug', ['slug'])
     .index('by_status', ['status'])
     .index('by_category', ['categoryId'])
     .index('by_seller', ['sellerId'])
-    .index('by_scheduled', ['status', 'publishAt']) // for scheduled publishing
-    .index('by_active_category', ['isActive', 'categoryId']),
+    .index('by_scheduled', ['status', 'publishAt']), // for scheduled publishing
+
 
   // Variants removed for simplified product model
 

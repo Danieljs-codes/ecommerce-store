@@ -10,19 +10,25 @@ import { MetricCard } from '@/components/admin/metric-card'
 import { Table } from '@/components/ui/table'
 import { formatMoney } from '@/lib/utils'
 import { format } from 'date-fns'
-import { IconClipboardFill } from '@intentui/icons'
+import {
+  IconClipboardFill,
+  IconDocumentEditFill,
+  IconDotsVertical,
+  IconTrashFill,
+} from '@intentui/icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { IconChevronLeft, IconChevronRight } from '@intentui/icons'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
+import { Menu } from '@/components/ui/menu'
 
 const searchParamSchema = z.object({
   filter: z
     .union([z.literal('active'), z.literal('draft'), z.literal('scheduled')])
     .optional()
     .catch(undefined),
-  page: z.number().int().positive().catch(1),
-  numItems: z.number().int().positive().catch(10),
+  page: z.number().int().positive().default(1).catch(1),
+  numItems: z.number().int().positive().default(10).catch(10),
 })
 
 export const Route = createFileRoute('/admin/products/')({
@@ -115,6 +121,7 @@ function RouteComponent() {
               <Table.Column>Stock</Table.Column>
               <Table.Column>Status</Table.Column>
               <Table.Column>Created at</Table.Column>
+              <Table.Column />
             </Table.Header>
             <Table.Body items={productsData.page}>
               {(item) => (
@@ -158,6 +165,24 @@ function RouteComponent() {
                   </Table.Cell>
                   <Table.Cell>
                     {format(new Date(item.createdAt), 'do MMM, yyyy')}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Menu>
+                      <Button size="sq-xs" intent="outline" onPress={() => {}}>
+                        <IconDotsVertical />
+                      </Button>
+                      <Menu.Content popover={{ placement: 'bottom right' }}>
+                        <Menu.Item>
+                          <IconDocumentEditFill />
+                          <Menu.Label>Edit Product</Menu.Label>
+                        </Menu.Item>
+                        <Menu.Separator />
+                        <Menu.Item isDanger>
+                          <IconTrashFill />
+                          <Menu.Label>Archive Product</Menu.Label>
+                        </Menu.Item>
+                      </Menu.Content>
+                    </Menu>
                   </Table.Cell>
                 </Table.Row>
               )}

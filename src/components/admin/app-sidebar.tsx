@@ -90,6 +90,11 @@ export default function AppSidebar({ user, ...props }: AppSidebarProps) {
             <SidebarLink
               isCurrent={pathname.startsWith('/admin/products')}
               to="/admin/products"
+              search={(prev) => ({
+                numItems: prev.numItems || 10,
+                page: prev.page || 1,
+                filter: prev.filter || undefined,
+              })}
               tooltip="Products"
             >
               <IconBuildingFill />

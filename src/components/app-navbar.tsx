@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '@convex/_generated/api'
-import { useLocation, useNavigate, useRouter } from '@tanstack/react-router'
+import { useLocation, useRouter } from '@tanstack/react-router'
 import { Avatar } from './ui/avatar'
 import { Logo } from './logo'
 import { ThemeToggle } from './theme-toggle'
@@ -62,23 +62,12 @@ function toSlug(label: string) {
     .replace(/^-+|-+$/g, '')
 }
 
-// Format price from kobo → NGN (₦)
-function formatNaira(kobo: number) {
-  return new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(kobo / 100)
-}
-
 type AppNavbarProps = NavbarProps & {
   user: Doc<'users'> | null
 }
 
 function UserMenu({ user }: { user: Doc<'users'> }) {
   const router = useRouter()
-  const navigate = useNavigate({ from: '/' })
   const queryClient = useQueryClient()
   const handleSignOut = async () => {
     await authClient.signOut({
