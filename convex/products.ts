@@ -218,3 +218,31 @@ export const getProductStats = query({
     return await fetchProductStats({ ...ctx, userId: user._id })
   },
 })
+
+
+export const archiveProduct = mutation({
+  args: { productId: v.id('products') },
+  handler: async (ctx, { productId }) => {
+    const user = await getUser(ctx)
+    if (!user || user.role !== 'admin') throw new Error('Unauthorized')
+    
+    const oldDoc = await ctx.db.get(productId)
+
+    if (!oldDoc) throw new Error('Product not found')
+
+    // Patch the product and fetch the updated doc in parallel
+    const [_, newDoc] = await Promise.all([
+      ctx.db.patch(oldDoc._id, {
+        status: 'archived',
+        updatedAt: Date.now(),
+      }),
+      ctx.db.get(productId),
+    ])
+
+    if (newDoc) {
+      await productsAggregate.replace(ctx, oldDoc, newDoc) // Update the aggregate with the new doc
+    }
+
+    return { id: productId }
+  },
+})

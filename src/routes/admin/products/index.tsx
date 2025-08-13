@@ -16,8 +16,11 @@ import { Button } from '@/components/ui/button'
 import { IconChevronLeft, IconChevronRight } from '@intentui/icons'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
 import { Menu } from '@/components/ui/menu'
-import { IconEdit } from '@/components/icons/edit'
 import { IconArchive } from '@/components/icons/archive'
+import { useState } from 'react'
+import { Doc } from '@convex/_generated/dataModel'
+import { ArchiveProductModal } from '@/components/admin/archive-product-modal'
+import { IconRestore } from '@/components/icons/restore'
 
 const searchParamSchema = z.object({
   filter: z
@@ -54,6 +57,8 @@ export const Route = createFileRoute('/admin/products/')({
 })
 
 function RouteComponent() {
+  const [selectedProduct, setSelectedProduct] =
+    useState<Doc<'products'> | null>(null)
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
   const { data } = useSuspenseQueryDeferred(
@@ -173,7 +178,7 @@ function RouteComponent() {
                   </Table.Cell>
                   <Table.Cell>
                     <Menu>
-                      <Button size="sq-xs" intent="outline" onPress={() => {}}>
+                      <Button size="sq-xs" intent="outline">
                         <IconDotsVertical />
                       </Button>
                       <Menu.Content
@@ -182,15 +187,30 @@ function RouteComponent() {
                           className: 'min-w-45',
                         }}
                       >
-                        <Menu.Item>
+                        {/* <Menu.Item onAction={() => setSelectedProduct(item)}>
                           <IconEdit />
                           <Menu.Label>Edit Product</Menu.Label>
                         </Menu.Item>
-                        <Menu.Separator />
-                        <Menu.Item isDanger>
-                          <IconArchive />
-                          <Menu.Label>Archive Product</Menu.Label>
-                        </Menu.Item>
+                        <Menu.Separator /> */}
+
+                        {item.status === 'archived' && (
+                          <Menu.Item
+                            isDanger
+                            onAction={() => setSelectedProduct(item)}
+                          >
+                            <IconRestore />
+                            <Menu.Label>Restore Product</Menu.Label>
+                          </Menu.Item>
+                        )}
+                        {item.status === 'active' && (
+                          <Menu.Item
+                            isDanger
+                            onAction={() => setSelectedProduct(item)}
+                          >
+                            <IconArchive />
+                            <Menu.Label>Archive Product</Menu.Label>
+                          </Menu.Item>
+                        )}
                       </Menu.Content>
                     </Menu>
                   </Table.Cell>
@@ -228,6 +248,14 @@ function RouteComponent() {
           </div>
         )}
       </div>
+      <ArchiveProductModal
+        product={selectedProduct}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setSelectedProduct(null)
+          }
+        }}
+      />
     </div>
   )
 }
