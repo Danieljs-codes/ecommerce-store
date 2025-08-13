@@ -10,17 +10,14 @@ import { MetricCard } from '@/components/admin/metric-card'
 import { Table } from '@/components/ui/table'
 import { formatMoney } from '@/lib/utils'
 import { format } from 'date-fns'
-import {
-  IconClipboardFill,
-  IconDocumentEditFill,
-  IconDotsVertical,
-  IconTrashFill,
-} from '@intentui/icons'
+import { IconClipboardFill, IconDotsVertical } from '@intentui/icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { IconChevronLeft, IconChevronRight } from '@intentui/icons'
 import { useSuspenseQueryDeferred } from '@/hooks/use-suspense-query-deferred'
 import { Menu } from '@/components/ui/menu'
+import { IconEdit } from '@/components/icons/edit'
+import { IconArchive } from '@/components/icons/archive'
 
 const searchParamSchema = z.object({
   filter: z
@@ -121,6 +118,7 @@ function RouteComponent() {
               <Table.Column>Stock</Table.Column>
               <Table.Column>Status</Table.Column>
               <Table.Column>Created at</Table.Column>
+              <Table.Column>Publish Date</Table.Column>
               <Table.Column />
             </Table.Header>
             <Table.Body items={productsData.page}>
@@ -157,7 +155,9 @@ function RouteComponent() {
                             ? 'info'
                             : item.status === 'draft'
                               ? 'secondary'
-                              : 'outline'
+                              : item.status === 'archived'
+                                ? 'danger'
+                                : 'outline'
                       }
                     >
                       {item.status}
@@ -167,18 +167,28 @@ function RouteComponent() {
                     {format(new Date(item.createdAt), 'do MMM, yyyy')}
                   </Table.Cell>
                   <Table.Cell>
+                    {item.status === 'scheduled' && item.publishAt
+                      ? format(new Date(item.publishAt), 'do MMM, yyyy')
+                      : 'Published'}
+                  </Table.Cell>
+                  <Table.Cell>
                     <Menu>
                       <Button size="sq-xs" intent="outline" onPress={() => {}}>
                         <IconDotsVertical />
                       </Button>
-                      <Menu.Content popover={{ placement: 'bottom right' }}>
+                      <Menu.Content
+                        popover={{
+                          placement: 'bottom right',
+                          className: 'min-w-45',
+                        }}
+                      >
                         <Menu.Item>
-                          <IconDocumentEditFill />
+                          <IconEdit />
                           <Menu.Label>Edit Product</Menu.Label>
                         </Menu.Item>
                         <Menu.Separator />
                         <Menu.Item isDanger>
-                          <IconTrashFill />
+                          <IconArchive />
                           <Menu.Label>Archive Product</Menu.Label>
                         </Menu.Item>
                       </Menu.Content>
